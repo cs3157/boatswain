@@ -1,5 +1,3 @@
-import requests
-
 def format_url(uri):
     return 'https://courseworks2.columbia.edu/api/v1{}'.format(uri)
 

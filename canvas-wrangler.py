@@ -5,8 +5,9 @@ import argparse
 import csv
 import requests
 import canvaslib as cvl
-import logging
 import boatswain_env as benv
+import logging
+logging.setLevel(logging.INFO)
 
 CMD_NAME = 'canvaswrangler'
 
@@ -105,6 +106,29 @@ def retrieve_index(header_row, target):
     return None
 
 
+# TODO: make (comment & grade) index (grade | index)
+# not necessary to have both
+def retrieve_indices(header, uni_col, grade_col, comment_col):
+    uni_idx = retrieve_index(header, uni_col)
+    if uni_idx is None:
+        raise IndexException('uni index not found')
+    else:
+        logging.info('uni index: %s', uni_idx)
+
+    grade_idx = retrieve_index(header, grade_col)
+    if grade_idx is None:
+        raise IndexException('grade index not found')
+    else:
+        logging.info('grade index: %s', grade_idx)
+
+    comment_idx = retrieve_index(header, opt.comment_idx)
+    if comment_idx is None:
+        raise IndexException('comment index not found')
+    else:
+        logging.info('comment index: %s', comment_idx)
+
+    return uni_idx, grade_idx, comment_idx
+
 def build_gradesheet(grades, sdb, uni_col, grade_col=None, comment_col=None):
     gradesheet = []
     for i, row in enumerate(grades):
@@ -124,29 +148,65 @@ def build_gradesheet(grades, sdb, uni_col, grade_col=None, comment_col=None):
     return gradesheet
 
 
+def log_post_success(res):
+    logging.info('Course ID: %s', res['context_id'])
+    logging.info('Assignment ID: %s', res['id'])
+    logging.info('''
+        Please wait as Canvas processes this POST request...
+        Feel free to check its progress at:
+            %s
+        ''', res['url'])
+
+
+def log_post_error(res):
+    logging.error('Error report ID: %s', res['error_report_id'])
+    for error in res['errors']:
+        logging.error('Error message: %s', error['message'])
+    logging.error('Error code: %s', error['error_code'])
+    logging.error('''
+        If that wasn\'t helpful (which it usually isn\'t),
+        please try the following:
+          - Make sure the assignment is published
+          - Sanitize unsupported unicode characters
+            (most commmonly smart quotations)
+          - Try again later; this might be a server error
+          - Try turning your computer off and on again
+            ^^^please don't actually
+
+        Also feel free to contact jzh2106@columbia.edu about this error
+    ''')
+
+
+def submit_grades(url, data, headers):
+    response = requests.post(url, data=data, headers=headers)
+    res = response.json()
+
+    if response.status_code == requests.codes.ok:
+        logging.info('Grades and comments successfully submitted')
+        log_post_success(res)
+    else:
+        logging.error('Error:', response.status_code)
+        log_post_error(res)
+    return response.status_code
+
+
 # TODO: set noop to false
-def wrangle_canvas(token, grades, sdb, opt, noop=True):
+def wrangle_canvas(token, grades, sdb, opt):
     header = grades.next()
 
-    uni_col = retrieve_index(header, opt.uni_col)
-    grade_col = retrieve_index(header, opt.grade_col)
-    comment_col = retrieve_index(header, opt.comment_col)
+    uni_idx, grade_idx, comment_idx =
+        retrieve_indices(header, opt.uni_col, opt.grade_col, opt.comment_col)
 
-    # bad error checking now
-    if uni_col is None or grade_col is None or comment_col is None:
-        logging.error('{} {} {}'.format(uni_col, grade_col, comment_col))
-        return
-    
-    gradesheet = build_gradesheet(grades, sdb, uni_col, grade_col, comment_col)
+    gradesheet = build_gradesheet(grades, sdb, uni_idx, grade_idx, comment_idx)
     
     headers = cvl.auth_header(token)
     uri, data = cvl.update_grades(opt.course_id, opt.assignment_id, gradesheet)
     url = cvl.format_url(uri)
 
-    if not noop:
-        print("lol")
-        return
-        res = requests.post(url, data=data, headers=headers)
+    if opt.noop:
+        logging.info('--noop option specified; not submitting to Canvas.')
+    else:
+        return submit_grades(url, data, headers)
 
 
 def main(argv=None, config_path=None, verbose=True):
@@ -158,7 +218,8 @@ def main(argv=None, config_path=None, verbose=True):
     grades = csv.reader(opt.grades)
     sdb = csv.reader(opt.sdb)
 
-    wrangle_canvas(config.canvasToken(), grades, sdb, opt, noop=opt.noop)
+    res = wrangle_canvas(config.canvasToken(), grades, sdb, opt, noop=opt.noop)
+    exit(res)
     
 if __name__ == '__main__':
     main()
