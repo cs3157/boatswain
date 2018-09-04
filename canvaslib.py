@@ -25,7 +25,7 @@ class GradesheetEntry(object):
 
 
 def update_grades(course_id, assignment_id, gradesheet):
-    url = '/courses/{}/assignments/{}/submissions/update_grades'.format(
+    uri = '/courses/{}/assignments/{}/submissions/update_grades'.format(
             course_id, assignment_id)
 
     data = {}
@@ -35,7 +35,7 @@ def update_grades(course_id, assignment_id, gradesheet):
         if e.comment is not None:
             data['grade_data[{}][text_comment]' % e.user_id] = e.comment
 
-    return url, data
+    return uri, data
 
 
 def main():

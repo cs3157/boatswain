@@ -89,7 +89,7 @@ def make_parser():
     )
 
     # testing options
-    parser.add_argument('-n', '--no-submit',
+    parser.add_argument('-n', '--noop',
                         default=False,
                         action='store_true',
                         help='do not submit grades; for testing purposes',
@@ -139,9 +139,9 @@ def wrangle_canvas(token, grades, sdb, opt, noop=True):
     
     gradesheet = build_gradesheet(grades, sdb, uni_col, grade_col, comment_col)
     
-    headers = auth_header(token)
+    headers = cvl.auth_header(token)
     uri, data = cvl.update_grades(opt.course_id, opt.assignment_id, gradesheet)
-    url = format_url(uri)
+    url = cvl.format_url(uri)
 
     if not noop:
         print("lol")
