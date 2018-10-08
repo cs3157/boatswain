@@ -37,11 +37,11 @@ Takes a parser and some arguments, and overrides some of the
 
 Returns a tuple of the parsed 
 """
-def envParse(section, parser, argv, config_path=None):
+def envParse(section, parser, args, config_path=None):
     if config_path is None:
         config_path = DEFAULT_INI_PATH
 
     config = BoatswainConfig(config_path)
     populateDefaults(config, parser, section)
-    return parser.parse_args(argv), config
+    return parser.parse_args(args), config
 

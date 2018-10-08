@@ -16,7 +16,8 @@ class GradesheetEntry(object):
         if grade is not None:
             float(grade)
         if comment is not None:
-            comment.decode('utf-8')
+            pass
+            # comment.decode('utf-8') # this used to check for invalid characters in python2
 
         self.grade = grade
         self.comment = comment
@@ -29,9 +30,9 @@ def update_grades(course_id, assignment_id, gradesheet):
     data = {}
     for e in gradesheet:
         if e.grade is not None:
-            data['grade_data[{}][posted_grade]' % e.user_id] = e.grade
+            data['grade_data[sis_user_id:%s][posted_grade]' % e.user_id] = e.grade
         if e.comment is not None:
-            data['grade_data[{}][text_comment]' % e.user_id] = e.comment
+            data['grade_data[sis_user_id:%s][text_comment]' % e.user_id] = e.comment
 
     return uri, data
 

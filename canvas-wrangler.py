@@ -7,7 +7,7 @@ import requests
 import canvaslib as cvl
 import boatswain_env as benv
 import logging
-logging.setLevel(logging.INFO)
+logging.basicConfig(level=logging.INFO)
 
 CMD_NAME = 'canvaswrangler'
 
@@ -15,14 +15,6 @@ def make_parser():
     parser = argparse.ArgumentParser(
             description='Upload grades and comments to Canvas')
 
-    # grade options
-    """
-    parser.add_argument('-g', '--submit-grade',
-                        default=False,
-                        action='store_true',
-                        help='upload grades',
-    )
-    """
     parser.add_argument('-G', '--grade-col',
                         default='grade',
                         type=str,
@@ -30,14 +22,6 @@ def make_parser():
                         metavar='<header>',
     )
 
-    # comment options
-    """
-    parser.add_argument('-c', '--submit-comment',
-                        default=False,
-                        action='store_true',
-                        help='upload comments',
-    )
-    """
     parser.add_argument('-C', '--comment-col',
                         default='comment',
                         type=str,
@@ -45,13 +29,6 @@ def make_parser():
                         metavar='<header>',
     )
 
-    # student options
-    parser.add_argument('-s', '--sdb',
-                        default='sdb.csv',
-                        type=argparse.FileType('rU'),
-                        help='csv containing students\'s user-ids',
-                        metavar='<sdb.csv>',
-    )
     parser.add_argument('-S', '--student-col',
                         default='uni',
                         type=str,
@@ -108,31 +85,31 @@ def retrieve_index(header_row, target):
 
 # TODO: make (comment & grade) index (grade | index)
 # not necessary to have both
-def retrieve_indices(header, uni_col, grade_col, comment_col):
-    uni_idx = retrieve_index(header, uni_col)
-    if uni_idx is None:
+def retrieve_indices(header, student_col, grade_col, comment_col):
+    student_idx = retrieve_index(header, student_col)
+    if student_idx is None:
         raise IndexException('uni index not found')
     else:
-        logging.info('uni index: %s', uni_idx)
+        logging.debug('student index: %s', student_idx)
 
     grade_idx = retrieve_index(header, grade_col)
     if grade_idx is None:
         raise IndexException('grade index not found')
     else:
-        logging.info('grade index: %s', grade_idx)
+        logging.debug('grade index: %s', grade_idx)
 
-    comment_idx = retrieve_index(header, opt.comment_idx)
+    comment_idx = retrieve_index(header, comment_col)
     if comment_idx is None:
         raise IndexException('comment index not found')
     else:
-        logging.info('comment index: %s', comment_idx)
+        logging.debug('comment index: %s', comment_idx)
 
-    return uni_idx, grade_idx, comment_idx
+    return student_idx, grade_idx, comment_idx
 
-def build_gradesheet(grades, sdb, uni_col, grade_col=None, comment_col=None):
+def build_gradesheet(grades, student_col, grade_col=None, comment_col=None):
     gradesheet = []
     for i, row in enumerate(grades):
-        user_id = sdb[grades[uni_col]]
+        user_id = row[student_col]
 
         if grade_col is not None:
             grade = row[grade_col]
@@ -173,7 +150,7 @@ def log_post_error(res):
           - Try turning your computer off and on again
             ^^^please don't actually
 
-        Also feel free to contact jzh2106@columbia.edu about this error
+        Also please contact jzh2106@columbia.edu (maintainer) about this error
     ''')
 
 
@@ -191,13 +168,13 @@ def submit_grades(url, data, headers):
 
 
 # TODO: set noop to false
-def wrangle_canvas(token, grades, sdb, opt):
-    header = grades.next()
+def wrangle_canvas(token, grades, opt):
+    header = next(grades)
 
-    uni_idx, grade_idx, comment_idx =
-        retrieve_indices(header, opt.uni_col, opt.grade_col, opt.comment_col)
+    student_idx, grade_idx, comment_idx = retrieve_indices(header, opt.student_col,
+            opt.grade_col, opt.comment_col)
 
-    gradesheet = build_gradesheet(grades, sdb, uni_idx, grade_idx, comment_idx)
+    gradesheet = build_gradesheet(grades, student_idx, grade_idx, comment_idx)
     
     headers = cvl.auth_header(token)
     uri, data = cvl.update_grades(opt.course_id, opt.assignment_id, gradesheet)
@@ -209,16 +186,15 @@ def wrangle_canvas(token, grades, sdb, opt):
         return submit_grades(url, data, headers)
 
 
-def main(argv=None, config_path=None, verbose=True):
-    if argv is None:
-        argv = sys.argv
+def main(args=None, config_path=None, verbose=True):
+    if args is None:
+        args = sys.args[1:]
 
-    opt, config = benv.envParse(CMD_NAME, make_parser(), argv, config_path)
+    opt, config = benv.envParse(CMD_NAME, make_parser(), args, config_path)
 
     grades = csv.reader(opt.grades)
-    sdb = csv.reader(opt.sdb)
 
-    res = wrangle_canvas(config.canvasToken(), grades, sdb, opt, noop=opt.noop)
+    res = wrangle_canvas(config.canvasToken(), grades, opt)
     exit(res)
     
 if __name__ == '__main__':
