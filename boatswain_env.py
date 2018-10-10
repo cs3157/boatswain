@@ -2,6 +2,8 @@
 import configparser
 import os
 
+import interactive as itv
+
 DEFAULT_INI_PATH = os.path.expanduser('~/.boatswain.ini')
 
 CANVAS_SECTION = 'canvas'
@@ -45,3 +47,44 @@ def envParse(section, parser, args, config_path=None):
     populateDefaults(config, parser, section)
     return parser.parse_args(args), config
 
+
+def newPopulatedConfigInteractive():
+    config = configparser.ConfigParser()
+    config.add_section(CANVAS_SECTION)
+    config.add_section(GITHUB_SECTION)
+
+    i = itv.promptSelect('Do you have a Canvas token?', ['n'], default='y')
+    if i == 'y':
+        canvasToken = itv.promptInput('Enter Canvas auth token')
+        config.set(CANVAS_SECTION, CANVAS_TOKEN, canvasToken)
+
+    i = itv.promptSelect('Do you have a GitHub token?', ['n'], default='y')
+    if i == 'y':
+        githubToken = itv.promptInput('Enter GitHub auth token')
+        config.set(GITHUB_SECTION, GITHUB_TOKEN, githubToken)
+
+    return config
+
+
+def createConfigInteractive():
+    try:
+        itv.output('This script will help you create your Boatswain config.')
+        path = itv.promptValidate('Enter Boatswain config file location', 
+                itv.newFileValidator(), default=DEFAULT_INI_PATH)
+        
+        config = newPopulatedConfigInteractive()
+        config.write(open(path, 'w+'))
+
+    except EOFError:
+        itv.output()
+        itv.output('Quitting intercative Boatswaing config creator...')
+        return
+
+
+def main():
+    itv.output('Welcome to Boatswain.')
+    createConfigInteractive()
+
+
+if __name__ == '__main__':
+    main()

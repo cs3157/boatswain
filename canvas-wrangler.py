@@ -188,7 +188,7 @@ def wrangle_canvas(token, grades, opt):
 
 def main(args=None, config_path=None, verbose=True):
     if args is None:
-        args = sys.args[1:]
+        args = sys.argv[1:]
 
     opt, config = benv.envParse(CMD_NAME, make_parser(), args, config_path)
 
