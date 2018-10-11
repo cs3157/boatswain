@@ -1,15 +1,17 @@
 Boatswain
 =========
 
-**boatswain** _noun_ a ship's officer in charge of equipment and the crew
+> Follow the river and you will find the C.
+
+##### **boatswain** _noun_
+> a ship's officer in charge of equipment and the crew
 
 A collection of command-line course management scripts used by Columbia CS TAs.
 Primarily targets interfacing with Columbia's LMS, [Canvas][canvas], but over
 time we will also add scripts that will support interfacing with GitHub.
 
-> Follow the river and you will find the C.
-
 [canvas]: https://github.com/instructure/canvas-lms
+
 
 Getting Started
 ---------------
