@@ -9,11 +9,9 @@ import boatswain_env as benv
 import logging
 
 CMD_NAME = 'canvaswrangler'
+DESC = 'Upload grades and comments to Canvas'
 
-def make_parser():
-    parser = argparse.ArgumentParser(
-            description='Upload grades and comments to Canvas')
-
+def wrangler_deco(parser):
     parser.add_argument('-G', '--grade-col',
                         default='grade',
                         type=str,
@@ -54,37 +52,6 @@ def make_parser():
                         metavar='<grades.csv>',
     )
 
-    '''
-    # warning log options
-    parser.add_argument('-L', '--log',
-                        default='',
-                        type=str,
-                        help='set filename for warning log',
-                        metavar='<warning.log>',
-    )
-    parser.add_argument('-N', '--no-log',
-                        default=False,
-                        action='store_true',
-                        help='do not produce log file for warnings',
-    )
-    '''
-
-    # testing options
-    parser.add_argument('-n', '--noop',
-                        default=False,
-                        action='store_true',
-                        help='do not submit grades; for testing purposes',
-    )
-
-    parser.add_argument('-v', '--verbose',
-                        default=False,
-                        action='store_true',
-                        help='turn on verbose output; for debugging',
-    )
-
-
-    return parser
-
 
 def retrieve_index(header_row, target):
     for i, cell in enumerate(header_row):
@@ -120,6 +87,7 @@ def retrieve_indices(header, student_col, grade_col, comment_col):
     logging.debug('')
 
     return student_idx, grade_idx, comment_idx
+
 
 def build_gradesheet(grades, student_idx, grade_idx=None, comment_idx=None):
     gradesheet = []
@@ -192,7 +160,8 @@ def log_dump_wrangler(url, data, headers, opt):
         logging.debug('}')
         logging.debug('')
 
-def wrangle_canvas(token, grades, opt):
+def wrangle_canvas(opt):
+    grades = csv.reader(opt.grades)
     header = next(grades)
 
     student_idx, grade_idx, comment_idx = retrieve_indices(
@@ -200,7 +169,7 @@ def wrangle_canvas(token, grades, opt):
 
     gradesheet = build_gradesheet(grades, student_idx, grade_idx, comment_idx)
     
-    headers = cvl.auth_header(token)
+    headers = cvl.auth_header(opt.canvasToken())
     uri, data = cvl.update_grades(opt.course_id, opt.assignment_id, gradesheet)
     url = cvl.format_url(uri)
 
@@ -216,16 +185,15 @@ def main(args=None, config_path=None, verbose=True):
     if args is None:
         args = sys.argv[1:]
 
-    opt, config = benv.envParse(CMD_NAME, make_parser(), args, config_path)
+    opt = benv.ParseOption(args, section=CMD_NAME, config_path=config_path,
+            desc=DESC, parse_deco=wrangler_deco, req_canvas=True)
 
     if opt.verbose:
         logging.basicConfig(level=logging.DEBUG)
     else:
         logging.basicConfig(level=logging.INFO)
 
-    grades = csv.reader(opt.grades)
-
-    res = wrangle_canvas(config.canvasToken(), grades, opt)
+    res = wrangle_canvas(opt)
     exit(res)
     
 if __name__ == '__main__':
