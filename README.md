@@ -20,7 +20,7 @@ Let's install all the dependencies the right way.
 Make sure you have Python3 and [`virtualenv`][venv] installed. Clone this repo.
 In the repo directory, create a virtual environment with the following command:
 
-    $ virtual venv
+    $ virtualenv venv
 
 `venv` could have been any path name, but we're going to assume that you used
 `venv`, and proceed. You should see a directory named `venv` created, and now
@@ -36,7 +36,8 @@ Now, you can install dependencies into this virtual environment.
 
     (venv) $ pip install -r requirements.txt
 
-This installs all the dependencies from the `requirements.txt` file.
+This installs all the dependencies from the `requirements.txt` file. Note that
+you should not need to do any of this as `sudo`.
 
 You're all set! If you'd like to exit your virtual environment, you can run
 the command `deactivate` at any time. Just make sure to activate it again any
