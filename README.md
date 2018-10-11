@@ -1,7 +1,7 @@
 Boatswain
 =========
 
-> **boatswain** _noun_ a ship's officer in charge of equipment and the crew
+**boatswain** _noun_ a ship's officer in charge of equipment and the crew
 
 A collection of command-line course management scripts used by Columbia CS TAs.
 Primarily targets interfacing with Columbia's LMS, [Canvas][canvas], but over
@@ -175,7 +175,7 @@ their student ID.
 
 To upload grades, run the command (with additional options):
 
-    ./canvas-wrangler.py <course-id> <assignment-id> <grades.csv-path>
+    (venv) $ ./canvas-wrangler.py <course-id> <assignment-id> <grades.csv-path>
 
 If it succeeded, it will give you a URL which you can use to check up on the
 grade upload process. It can usually take a few minutes to process all the
