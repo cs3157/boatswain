@@ -3,8 +3,7 @@ Boatswain
 
 > Follow the river and you will find the C.
 
-##### **boatswain** _noun_
-> a ship's officer in charge of equipment and the crew
+> **boatswain** _noun_ a ship's officer in charge of equipment and the crew
 
 A collection of command-line course management scripts used by Columbia CS TAs.
 Primarily targets interfacing with Columbia's LMS, [Canvas][canvas], but over
