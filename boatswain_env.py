@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 
 import configparser
 import os
@@ -25,20 +26,19 @@ class BoatswainConfig(configparser.ConfigParser):
         return self[GITHUB_SECTION][GITHUB_TOKEN]
 
 
-"""
+'''
 Takes a parser and sets the defaults to anything specified in that section
 of the local boatswain config file
-"""
+'''
 def populateDefaults(config, parser, section):
     if section in config.sections():
         parser.set_defaults(**dict(config.items(section)))
 
-
-"""
+'''
 Takes a parser and some arguments, and overrides some of the 
 
 Returns a tuple of the parsed 
-"""
+'''
 def envParse(section, parser, args, config_path=None):
     if config_path is None:
         config_path = DEFAULT_INI_PATH
@@ -53,12 +53,15 @@ def newPopulatedConfigInteractive():
     config.add_section(CANVAS_SECTION)
     config.add_section(GITHUB_SECTION)
 
-    i = itv.promptSelect('Do you have a Canvas token?', ['n'], default='y')
+    i = itv.promptSelect('Configure Canvas token?', ['n'], default='y')
     if i == 'y':
+        itv.output('You can generate a new Canvas token by going to your '
+                'Canvas Profile -> Settings -> Approved Integrations '
+                'and clicking on "+New Access Token"')
         canvasToken = itv.promptInput('Enter Canvas auth token')
         config.set(CANVAS_SECTION, CANVAS_TOKEN, canvasToken)
 
-    i = itv.promptSelect('Do you have a GitHub token?', ['n'], default='y')
+    i = itv.promptSelect('Configure GitHub token?', ['n'], default='y')
     if i == 'y':
         githubToken = itv.promptInput('Enter GitHub auth token')
         config.set(GITHUB_SECTION, GITHUB_TOKEN, githubToken)
@@ -74,6 +77,8 @@ def createConfigInteractive():
         
         config = newPopulatedConfigInteractive()
         config.write(open(path, 'w+'))
+
+        itv.output('Boatswain config file created at {}'.format(path))
 
     except EOFError:
         itv.output()
