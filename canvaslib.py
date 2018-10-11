@@ -35,12 +35,3 @@ def update_grades(course_id, assignment_id, gradesheet):
             data['grade_data[sis_user_id:%s][text_comment]' % e.user_id] = e.comment
 
     return uri, data
-
-
-def main():
-    token = '1396~BU3vydP9ceeWGjfTAUFob4rzuQNbvTkWtmF4sehn3JamYGJzxu46eOedpYoSZTZJ'
-    header = auth_header(token)
-
-
-if __name__ == '__main__':
-    main()
