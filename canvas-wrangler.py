@@ -6,7 +6,6 @@ import csv
 import requests
 import canvaslib as cvl
 import boatswain_env as benv
-import logging
 
 CMD_NAME = 'canvaswrangler'
 DESC = 'Upload grades and comments to Canvas'
@@ -24,7 +23,7 @@ def wrangler_deco(parser):
                         default='comment',
                         type=str,
                         help='set name for comment header column, '
-                            'pass empty string to not submit grades',
+                            'pass empty string to not submit comment',
                         metavar='<header>',
     )
 
@@ -60,31 +59,29 @@ def retrieve_index(header_row, target):
     raise LookupError('uni index not found')
 
 
-def retrieve_indices(header, student_col, grade_col, comment_col):
-    if student_col == '':
+def retrieve_indices(header, opt):
+    if opt.student_col == '':
         raise LookupError('must specify student column header value')
     else:
-        student_idx = retrieve_index(header, student_col)
-        logging.debug('student index: %s', student_idx)
+        student_idx = retrieve_index(header, opt.student_col)
+        opt.info('student index: %s', student_idx)
 
-    if grade_col == '' and comment_col == '':
+    if opt.grade_col == '' and opt.comment_col == '':
         raise LookupError('neither grade nor column specified')
 
-    if grade_col == '':
+    if opt.grade_col == '':
         grade_idx = None
-        logging.debug('empty grade column specified, not submitting grades')
+        opt.info('empty grade column specified, not submitting grades')
     else:
-        grade_idx = retrieve_index(header, grade_col)
-        logging.debug('grade index: %s', grade_idx)
+        grade_idx = retrieve_index(header, opt.grade_col)
+        opt.info('grade index: %s', grade_idx)
 
-    if comment_col == '':
+    if opt.comment_col == '':
         comment_idx = None
-        logging.debug('empty comment column specified, not submitting comments')
+        opt.info('empty comment column specified, not submitting comments')
     else:
-        comment_idx = retrieve_index(header, comment_col)
-        logging.debug('comment index: %s', comment_idx)
-
-    logging.debug('')
+        comment_idx = retrieve_index(header, opt.comment_col)
+        opt.info('comment index: %s', comment_idx)
 
     return student_idx, grade_idx, comment_idx
 
@@ -108,22 +105,21 @@ def build_gradesheet(grades, student_idx, grade_idx=None, comment_idx=None):
     return gradesheet
 
 
-def log_post_success(res):
-    logging.info('Course ID: %s', res['context_id'])
-    logging.info('Assignment ID: %s', res['id'])
-    logging.info('''
+def log_post_success(res, opt):
+    opt.info('Course ID: %s', res['context_id'])
+    opt.info('Assignment ID: %s', res['id'])
+    opt.info('''
         Please wait as Canvas processes this POST request...
         Feel free to check its progress at:
             %s
         ''', res['url'])
 
 
-def log_post_error(res):
-    logging.error('Error report ID: %s', res['error_report_id'])
+def log_post_error(res, opt):
+    opt.error('Error report ID: {}', res['error_report_id'])
     for error in res['errors']:
-        logging.error('Error message: %s', error['message'])
-    logging.error('Error code: %s', error['error_code'])
-    logging.error('''
+        opt.error('Error message: {}', error['message'])
+    opt.error('''
         If that wasn\'t helpful (which it usually isn\'t),
         please try the following:
           - Make sure the assignment is published
@@ -137,35 +133,33 @@ def log_post_error(res):
     ''')
 
 
-def submit_grades(url, data, headers):
+def submit_grades(url, data, headers, opt):
     response = requests.post(url, data=data, headers=headers)
     res = response.json()
 
     if response.status_code == requests.codes.ok:
-        logging.info('Grades and comments successfully submitted')
-        log_post_success(res)
+        opt.log('Grades and comments successfully submitted')
+        log_post_success(res, opt)
     else:
-        logging.error('Error:', response.status_code)
-        log_post_error(res)
+        opt.error('Error: {}', response.status_code)
+        log_post_error(res, opt)
     return response.status_code
 
 
 def log_dump_wrangler(url, data, headers, opt):
-    if opt.verbose:
-        logging.debug('API URL: {}'.format(url))
-        logging.debug('Headers: {}'.format(headers))
-        logging.debug('Data: {')
-        for k in data:
-            logging.debug('\t{} : {}'.format(k, data[k]))
-        logging.debug('}')
-        logging.debug('')
+    opt.info('API URL: {}'.format(url))
+    opt.info('Headers: {}'.format(headers))
+    opt.info('Data: {')
+    for k in data:
+        opt.info('{} : {}'.format(k, data[k]))
+    opt.info('}')
+    opt.info('')
 
 def wrangle_canvas(opt):
     grades = csv.reader(opt.grades)
     header = next(grades)
 
-    student_idx, grade_idx, comment_idx = retrieve_indices(
-            header, opt.student_col, opt.grade_col, opt.comment_col)
+    student_idx, grade_idx, comment_idx = retrieve_indices(header, opt)
 
     gradesheet = build_gradesheet(grades, student_idx, grade_idx, comment_idx)
     
@@ -176,9 +170,17 @@ def wrangle_canvas(opt):
     log_dump_wrangler(url, data, headers, opt)
 
     if opt.noop:
-        logging.info('--noop option specified; not submitting to Canvas.')
-    else:
-        return submit_grades(url, data, headers)
+        opt.log('--noop option specified; not submitting to Canvas.')
+        return
+
+    opt.log('About to submit. Make sure the assignment is muted.')
+    cont = opt.promptYes('Would you like to continue?', True)
+
+    if cont:
+        opt.log('Submitting to Canvas...')
+        return submit_grades(url, data, headers, opt)
+
+    opt.log('Aborting; not submiting to Canvas')
 
 
 def main(args=None, config_path=None, verbose=True):
@@ -187,11 +189,6 @@ def main(args=None, config_path=None, verbose=True):
 
     opt = benv.ParseOption(args, section=CMD_NAME, config_path=config_path,
             desc=DESC, parse_deco=wrangler_deco, req_canvas=True)
-
-    if opt.verbose:
-        logging.basicConfig(level=logging.DEBUG)
-    else:
-        logging.basicConfig(level=logging.INFO)
 
     res = wrangle_canvas(opt)
     exit(res)

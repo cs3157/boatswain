@@ -14,6 +14,12 @@ CANVAS_TOKEN = 'token'
 GITHUB_SECTION = 'github'
 GITHUB_TOKEN = 'token'
 
+DEBUG, DEBUG_TAG    = 30,   'DEBUG'
+INFO, INFO_TAG      = 20,   'INFO'
+WARN, WARN_TAG      = 10,   'WARN'  # default
+ERROR, ERROR_TAG    = 0,    'ERROR'
+SILENT              = -1
+
 
 '''
 Represents CSV configuration file
@@ -30,10 +36,11 @@ class BoatswainConfig(configparser.ConfigParser):
     def githubToken(self):
         return self.get(GITHUB_SECTION, GITHUB_TOKEN)
 
+def _fmt(fmt, *args, tag=None):
+    return fmt
 
 # No __init__ function. ParseOption is its factory that uses argparse
 class BoatswainOption(argparse.Namespace):
-
     '''
     If tokens were set by arg parse stage, then just return that.
     Otherwise, read it in from config, and possibly fail if it's not there
@@ -42,10 +49,52 @@ class BoatswainOption(argparse.Namespace):
         if self.canvas_token is None:
             return self.config.canvasToken()
         return self.canvas_token
+
     def githubToken(self):
         if self.github_token is None:
             return self.config.githubToken()
         return self.github_token
+
+    def log(self, fmt, *args, tag=None):
+        if self.log_level < 0: # silent
+            return
+
+        if len(args) > 0:
+            fmt = fmt.format(*args)
+        if tag is not None:
+            fmt = '=={}==\t{}'.format(tag, fmt)
+
+        # TODO: logging to file
+        print(fmt)
+
+    def debug(self, *args):
+        if self.log_level >= DEBUG:
+            self.log(*args, tag=DEBUG_TAG)
+    
+    def info(self, *args):
+        if self.log_level >= INFO:
+            self.log(*args, tag=INFO_TAG)
+
+    def warn(self, *args):
+        if self.log_level >= WARN:
+            self.log(*args, tag=WARN_TAG)
+
+    def error(self, *args):
+        if self.log_level >= ERROR:
+            self.log(*args, tag=ERROR_TAG)
+
+    def promptYes(self, prompt, default):
+        if default:
+            d, a = 'y', 'n'
+        else:
+            a, d = 'y', 'n'
+        if self.yes:
+            self.info('{} {} (--yes specified)', prompt, d.upper())
+            return default
+        else:
+            r = itv.promptSelect(prompt, [a], default=d)
+            return r.lower() == 'y'.lower()
+
 
 
 '''
@@ -84,17 +133,36 @@ def ParseOption(
                         help='do not perform action; for testing',
     )
 
-    parser.add_argument('-v', '--verbose',
-                        default=False,
-                        action='store_true',
-                        help='turn on verbose output; for debugging',
-    )
-
     parser.add_argument('-y', '--yes',
                         default=False,
                         action='store_true',
                         help='automatic yes to prompts, non-interactive',
     )
+
+    lvl_parser = parser.add_mutually_exclusive_group()
+    lvl_parser.add_argument('--silent',
+                        default=False,
+                        action='store_true',
+                        help='supress all output',
+    )
+    lvl_parser.add_argument('-q', '--quiet',
+                        default=False,
+                        action='store_true',
+                        help='supress warnings',
+    )
+    lvl_parser.add_argument('-v', '--verbose',
+                        default=False,
+                        action='store_true',
+                        help='verbose output',
+    )
+    lvl_parser.add_argument('--debug',
+                        default=False,
+                        action='store_true',
+                        help='debug mode; enable all output',
+    )
+
+    
+
 
     config = BoatswainConfig(config_path)
 
@@ -152,9 +220,18 @@ def ParseOption(
     opt.__class__ = BoatswainOption
     opt.config = config
 
-    return opt
-    
+    if opt.debug:
+        opt.log_level = DEBUG
+    elif opt.verbose:
+        opt.log_level = INFO
+    elif opt.quiet:
+        opt.log_level = ERROR
+    elif opt.silent:
+        opt.log_level = SILENT
+    else:
+        opt.log_level = WARN
 
+    return opt
 
 
 ######## Interactive Boatswain Config Bootstrapper ########
