@@ -64,7 +64,7 @@ def retrieve_indices(header, opt):
         raise LookupError('must specify student column header value')
     else:
         student_idx = retrieve_index(header, opt.student_col)
-        opt.info('student index: %s', student_idx)
+        opt.info('student index: {}', student_idx)
 
     if opt.grade_col == '' and opt.comment_col == '':
         raise LookupError('neither grade nor column specified')
@@ -74,14 +74,14 @@ def retrieve_indices(header, opt):
         opt.info('empty grade column specified, not submitting grades')
     else:
         grade_idx = retrieve_index(header, opt.grade_col)
-        opt.info('grade index: %s', grade_idx)
+        opt.info('grade index: {}', grade_idx)
 
     if opt.comment_col == '':
         comment_idx = None
         opt.info('empty comment column specified, not submitting comments')
     else:
         comment_idx = retrieve_index(header, opt.comment_col)
-        opt.info('comment index: %s', comment_idx)
+        opt.info('comment index: {}', comment_idx)
 
     return student_idx, grade_idx, comment_idx
 
@@ -106,12 +106,12 @@ def build_gradesheet(grades, student_idx, grade_idx=None, comment_idx=None):
 
 
 def log_post_success(res, opt):
-    opt.info('Course ID: %s', res['context_id'])
-    opt.info('Assignment ID: %s', res['id'])
+    opt.info('Course ID: {}', res['context_id'])
+    opt.info('Assignment ID: {}', res['id'])
     opt.info('''
         Please wait as Canvas processes this POST request...
         Feel free to check its progress at:
-            %s
+            {}
         ''', res['url'])
 
 

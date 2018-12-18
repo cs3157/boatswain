@@ -89,7 +89,7 @@ class BoatswainOption(argparse.Namespace):
         else:
             a, d = 'y', 'n'
         if self.yes:
-            self.info('{} {} (--yes specified)', prompt, d.upper())
+            self.warn('{} {} (--yes specified)', prompt, d.upper())
             return default
         else:
             r = itv.promptSelect(prompt, [a], default=d)
