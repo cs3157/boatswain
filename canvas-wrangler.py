@@ -4,8 +4,8 @@ import sys
 import argparse
 import csv
 import requests
-import canvaslib as cvl
 import boatswain_env as benv
+from canvasapi import Canvas
 
 CMD_NAME = 'canvaswrangler'
 DESC = 'Upload grades and comments to Canvas'
@@ -86,74 +86,36 @@ def retrieve_indices(header, opt):
     return student_idx, grade_idx, comment_idx
 
 
-def build_gradesheet(grades, student_idx, grade_idx=None, comment_idx=None):
-    gradesheet = []
+def build_grade_data(grades, student_idx, grade_idx=None, comment_idx=None):
+    grade_data = {}
     for i, row in enumerate(grades):
+        grade_entry = {}
         user_id = row[student_idx]
 
         if grade_idx is not None:
-            grade = row[grade_idx]
-        else:
-            grade = None
+            grade_entry['posted_grade'] = row[grade_idx]
 
         if comment_idx is not None:
-            comment = row[comment_idx]
-        else:
-            comment = None
-        gradesheet.append(cvl.GradesheetEntry(user_id, grade, comment))
+            grade_entry['text_comment'] = row[comment_idx]
 
-    return gradesheet
+        grade_data['sis_user_id:{}'.format(user_id)] = grade_entry
 
-
-def log_post_success(res, opt):
-    opt.info('Course ID: {}', res['context_id'])
-    opt.info('Assignment ID: {}', res['id'])
-    opt.info('''
-        Please wait as Canvas processes this POST request...
-        Feel free to check its progress at:
-            {}
-        ''', res['url'])
+    return grade_data
 
 
-def log_post_error(res, opt):
-    opt.error('Error report ID: {}', res['error_report_id'])
-    for error in res['errors']:
-        opt.error('Error message: {}', error['message'])
-    opt.error('''
-        If that wasn\'t helpful (which it usually isn\'t),
-        please try the following:
-          - Make sure the assignment is published
-          - Sanitize unsupported unicode characters
-            (most commmonly smart quotations)
-          - Try again later; this might be a server error
-          - Try turning your computer off and on again
-            ^^^please don't actually
-
-        Also please contact jzh2106@columbia.edu (maintainer) about this error
-    ''')
-
-
-def submit_grades(url, data, headers, opt):
-    response = requests.post(url, data=data, headers=headers)
-    res = response.json()
-
-    if response.status_code == requests.codes.ok:
-        opt.log('Grades and comments successfully submitted')
-        log_post_success(res, opt)
-    else:
-        opt.error('Error: {}', response.status_code)
-        log_post_error(res, opt)
-    return response.status_code
-
-
-def log_dump_wrangler(url, data, headers, opt):
-    opt.info('API URL: {}'.format(url))
-    opt.info('Headers: {}'.format(headers))
+def log_dump_wrangler(data, course, assignment, opt):
+    opt.info('Course: {}'.format(course))
+    opt.info('Course: {}'.format(assignment))
     opt.info('Data: {')
     for k in data:
         opt.info('{} : {}'.format(k, data[k]))
     opt.info('}')
     opt.info('')
+
+
+def submit_grades(data, assignment, opt):
+    return assignment.submissions_bulk_update(grade_data=data)
+
 
 def wrangle_canvas(opt):
     grades = csv.reader(opt.grades)
@@ -161,13 +123,14 @@ def wrangle_canvas(opt):
 
     student_idx, grade_idx, comment_idx = retrieve_indices(header, opt)
 
-    gradesheet = build_gradesheet(grades, student_idx, grade_idx, comment_idx)
-    
-    headers = cvl.auth_header(opt.canvasToken())
-    uri, data = cvl.update_grades(opt.course_id, opt.assignment_id, gradesheet)
-    url = cvl.format_url(uri)
+    grade_data = build_grade_data(grades, student_idx, grade_idx, comment_idx)
 
-    log_dump_wrangler(url, data, headers, opt)
+    canvasURL = 'https://courseworks2.columbia.edu/api/v1' # TODO: don't hard
+    canvas = Canvas(canvasURL, opt.canvasToken())
+    course = canvas.get_course(opt.course_id)
+    assignment = course.get_assignment(opt.assignment_id)
+
+    log_dump_wrangler(data, course, assignment, opt)
 
     if opt.noop:
         opt.log('--noop option specified; not submitting to Canvas.')
@@ -176,11 +139,19 @@ def wrangle_canvas(opt):
     opt.log('About to submit. Make sure the assignment is muted.')
     cont = opt.promptYes('Would you like to continue?', True)
 
-    if cont:
-        opt.log('Submitting to Canvas...')
-        return submit_grades(url, data, headers, opt)
+    if not cont:
+        opt.log('Aborting; not submiting to Canvas')
+        return
 
-    opt.log('Aborting; not submiting to Canvas')
+    opt.log('Submitting to Canvas...')
+    progress = submit_grades(data, assignment, opt)
+
+    # do something with progress? it has the following useful fields:
+    #   .workflow_state = 'completed' | 'running' | *
+    #   .query()        // checks progress
+    #   .tag            // what the progress is for
+    #   .message        // tells you how many courses updated
+    # we can have the option to block until complete
 
 
 def main(args=None, config_path=None, verbose=True):
@@ -190,8 +161,8 @@ def main(args=None, config_path=None, verbose=True):
     opt = benv.ParseOption(args, section=CMD_NAME, config_path=config_path,
             desc=DESC, parse_deco=wrangler_deco, req_canvas=True)
 
-    res = wrangle_canvas(opt)
-    exit(res)
-    
+    wrangle_canvas(opt)
+
+
 if __name__ == '__main__':
     main()
