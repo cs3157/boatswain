@@ -3,7 +3,6 @@
 import sys
 import argparse
 import csv
-import requests
 import boatswain_env as benv
 from canvasapi import Canvas
 
