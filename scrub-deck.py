@@ -1,13 +1,28 @@
 #!/usr/bin/env python3
 
 import sys
+import re
 import boatswain_env as benv
 from github import Github
+
 
 CMD_NAME = 'scrub'
 DESC = 'Delete all repos from a GitHub org'
 
+
 def scrub_deco(parser):
+    parser.add_argument('-f', '--filter',
+                        default=r'.*',
+                        type=re.compile,
+                        help='regular expression to filter',
+                        metavar='<regex>',
+    )
+
+    parser.add_argument('-i', '--invert',
+                        action='store_true',
+                        help='invert regex filter',
+    )
+
     parser.add_argument('org_name',
                         type=str,
                         help='organization to be scrubbed',
@@ -16,6 +31,13 @@ def scrub_deco(parser):
 
 
 def scrub(repo, opt):
+    repo_name = repo.full_name.split('/')[-1]
+    if opt.invert:
+        if opt.filter.fullmatch(repo_name):
+            return
+    else:
+        if not opt.filter.fullmatch(repo_name):
+            return
     print(repo)
     # repo.delete()
 
