@@ -38,8 +38,10 @@ def scrub(repo, opt):
     else:
         if not opt.filter.fullmatch(repo_name):
             return
-    print(repo)
-    # repo.delete()
+
+    print(opt.githubToken())
+    opt.info('Deleting {}...'.format(repo))
+    repo.delete()
 
 
 def scrub_org(opt):
