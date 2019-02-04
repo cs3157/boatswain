@@ -39,7 +39,6 @@ def scrub(repo, opt):
         if not opt.filter.fullmatch(repo_name):
             return
 
-    print(opt.githubToken())
     opt.info('Deleting {}...'.format(repo))
     repo.delete()
 
@@ -62,6 +61,8 @@ def scrub_org(opt):
 
     for repo in org.get_repos():
         scrub(repo, opt)
+    opt.warn('Double-check all repos have actually been removed.')
+    opt.warn('Sometimes you need to re-run this a couple of times.')
 
 
 def main(args=None, config_path=None, verbose=True):
