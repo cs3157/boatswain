@@ -40,6 +40,8 @@ def do_mk_repo(org, repo_name, opt):
     # funky output so easily greppable
     opt.warn('@CREATED_REPO: {} {}'.format(repo_name, repo.git_url))
 
+    return repo
+
 
 def mk_repo(opt):
     g = Github(opt.githubToken())
