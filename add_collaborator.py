@@ -33,27 +33,30 @@ def add_collaborator_deco(parser):
     )
 
 
+def add_collaborator_repo(repo, user, permission, opt):
+
+    opt.info('Proceeding to {} as collaborator to {} with {} permissions'
+            .format(user, repo.full_name, permission))
+
+    repo.add_to_collaborators(user, permission=permission)
+
+    opt.info('User {} successfully added'.format(user))
+
+
 def add_collaborator(opt):
     g = Github(opt.githubToken())
     repo_full_name = '{}/{}'.format(opt.owner, opt.repo)
-
-
-    print(repo_full_name)
     repo = g.get_repo(repo_full_name)
 
     if not opt.promptYes(('Are you sure you would like to add {} '
                             'as a collaborator to {} with {} permissions?')
-                            .format(opt.user, repo_full_name, opt.permission),
+                            .format(user, repo_full_name, permission),
                         True):
         opt.warn('Aborting')
-        return 
+        return
 
-    opt.info('Proceeding to {} as collaborator to {} with {} permissions'
-            .format(opt.user, repo_full_name, opt.permission))
+    add_collaborator_repo(repo, opt.user, opt.permission, opt)
 
-    repo.add_to_collaborators(opt.user, permission=opt.permission)
-
-    opt.info('User {} successfully added'.format(opt.user))
 
 def main(args=None, config_path=None):
     if args is None:
