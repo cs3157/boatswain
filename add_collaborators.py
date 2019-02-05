@@ -2,6 +2,7 @@
 
 import sys
 import boatswain_env as benv
+import argparse
 from github import Github
 from add_collaborator import add_collaborator_repo
 
@@ -21,10 +22,10 @@ def add_collaborator_deco(parser):
                         metavar='<repo-name>',
     )
 
-    parser.add_argument('path',
-                        type=str,
+    parser.add_argument('users',
+                        type=argparse.FileType('rU'),
                         help='path of list of users to be added',
-                        metavar='<path>',
+                        metavar='<users.txt>',
     )
 
     parser.add_argument('permission',
@@ -47,36 +48,35 @@ def add_collaborators(opt):
 
     if not opt.promptYes(('Are you sure you would like to add users from {} '
                             'as collaborators to {} with {} permissions?')
-                            .format(opt.path, repo_full_name, opt.permission),
+                            .format(opt.users.name, repo_full_name, opt.permission),
                         True):
         opt.warn('Aborting')
         return 
 
     opt.info('Proceeding to add {} as collaborators to {} with {} permissions'
-            .format(opt.path, repo_full_name, opt.permission))
+            .format(opt.users.name, repo_full_name, opt.permission))
 
-    with open(opt.path) as users:
-        do_add = opt.begin is None
-        begin, added, total = 0, 0, 0
-        for user in users:
-            try:
-                user = user.strip()
-                total = total + 1
+    do_add = opt.begin is None
+    begin, added, total = 0, 0, 0
+    for user in opt.users:
+        try:
+            user = user.strip()
+            total = total + 1
 
-                if not do_add and user == opt.begin:
-                    begin = total
-                    do_add = True
+            if not do_add and user == opt.begin:
+                begin = total
+                do_add = True
 
-                if do_add:
-                    add_collaborator_repo(repo, user, opt.permission, opt)
-                    added = added + 1
-                else:
-                    opt.info('Skipped {}'.format(user))
+            if do_add:
+                add_collaborator_repo(repo, user, opt.permission, opt)
+                added = added + 1
+            else:
+                opt.info('Skipped {}'.format(user))
 
-            except Exception as e:
-                opt.error(e)
-                opt.error('{} failed on {}'.format(CMD_NAME, user))
-                return
+        except Exception as e:
+            opt.error(e)
+            opt.error('{} failed on {}'.format(CMD_NAME, user))
+            return
 
     opt.info('Added {} users of {} total users, starting from index {}'
             .format(added, total, begin))
