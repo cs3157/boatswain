@@ -29,7 +29,10 @@ def mk_repo_deco(parser):
 
 
 def fmt_hyphen(prefix, name):
-    return '{}-{}'.format(prefix, name)
+    if prefix[-1] == '-':
+        return '{}{}'.format(prefix, name)
+    else:
+        return '{}-{}'.format(prefix, name)
 
 
 def do_mk_repo(org, repo_name, opt):

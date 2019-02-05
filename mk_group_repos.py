@@ -56,14 +56,16 @@ def mk_group_repos(opt):
     org = g.get_organization(opt.org)
 
     if not opt.promptYes(('Are you sure you would like to create group repos for '
-                            'users in {} under organization {} with prefix {}')
-                            .format(opt.groups.name, opt.org, opt.prefix),
+                            'users in {} under organization {} with name {}')
+                            .format(opt.groups.name, opt.org,
+                                fmt_hyphen(opt.prefix, '<group>')),
                         True):
         opt.warn('Aborting')
         return 
 
-    opt.info('Creating repos under {} for groups in {}, with prefix {}'
-            .format(opt.groups.name, opt.org, opt.prefix))
+    opt.info('Creating repos under {} for groups in {}, with name {}'
+            .format(opt.groups.name, opt.org,
+                fmt_hyphen(opt.prefix, '<group>')))
 
     for g in csv.reader(opt.groups):
         group, members = g[0], [m.strip() for m in g[1:] if m != '']

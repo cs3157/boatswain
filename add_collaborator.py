@@ -35,7 +35,7 @@ def add_collaborator_deco(parser):
 
 def add_collaborator_repo(repo, user, permission, opt):
 
-    opt.info('Proceeding to {} as collaborator to {} with {} permissions'
+    opt.info('Proceeding to add {} as collaborator to {} with {} permissions'
             .format(user, repo.full_name, permission))
 
     repo.add_to_collaborators(user, permission=permission)
