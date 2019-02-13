@@ -4,12 +4,12 @@ import sys
 import boatswain_env as benv
 import argparse
 from github import Github
-from add_collaborator import add_collaborator_repo
+from add_collaborator import do_add_collaborator
 
 CMD_NAME = 'add_collaborators'
 DESC = 'Add multiple users as collaborator to GitHub repo'
 
-def add_collaborator_deco(parser):
+def add_collaborators_deco(parser):
     parser.add_argument('owner',
                         type=str,
                         help='repo owner (individual or organization)',
@@ -48,8 +48,8 @@ def add_collaborators(opt):
 
     if not opt.promptYes(('Are you sure you would like to add users from {} '
                             'as collaborators to {} with {} permissions?')
-                            .format(opt.users.name, repo_full_name, opt.permission),
-                        True):
+                            .format(opt.users.name, repo_full_name,
+                                opt.permission), True):
         opt.warn('Aborting')
         return 
 
@@ -68,14 +68,14 @@ def add_collaborators(opt):
                 do_add = True
 
             if do_add:
-                add_collaborator_repo(repo, user, opt.permission, opt)
+                do_add_collaborator(repo, user, opt.permission, opt)
                 added = added + 1
             else:
                 opt.info('Skipped {}'.format(user))
 
         except Exception as e:
             opt.error(e)
-            opt.error('{} failed on {}'.format(CMD_NAME, user))
+            opt.error('{} failed on {} ({})'.format(CMD_NAME, user, total))
             return
 
     opt.info('Added {} users of {} total users, starting from index {}'
@@ -87,7 +87,7 @@ def main(args=None, config_path=None):
         args = sys.argv[1:]
 
     opt = benv.ParseOption(args, section=CMD_NAME, config_path=config_path,
-            desc=DESC, parse_deco=add_collaborator_deco, req_github=True)
+            desc=DESC, parse_deco=add_collaborators_deco, req_github=True)
 
     add_collaborators(opt)
 

@@ -14,7 +14,7 @@ def scrub_deco(parser):
     parser.add_argument('-f', '--filter',
                         default=r'.*',
                         type=re.compile,
-                        help='regular expression to filter',
+                        help='only scrub repos matching regular expression',
                         metavar='<regex>',
     )
 
@@ -30,14 +30,10 @@ def scrub_deco(parser):
     )
 
 
-def scrub(repo, opt):
-    repo_name = repo.full_name.split('/')[-1]
-    if opt.invert:
-        if opt.filter.fullmatch(repo_name):
-            return
-    else:
-        if not opt.filter.fullmatch(repo_name):
-            return
+def do_scrub(repo, opt):
+    if opt.noop:
+        opt.log('--noop option specified; not deleting repo')
+        return
 
     opt.info('Deleting {}...'.format(repo))
     repo.delete()
@@ -60,7 +56,20 @@ def scrub_org(opt):
         return
 
     for repo in org.get_repos():
-        scrub(repo, opt)
+        repo_name = repo.full_name.split('/')[-1]
+        if opt.invert:
+            if opt.filter.fullmatch(repo_name):
+                opt.info('Skipping {}; matched with inverted filter: {}'
+                        .format(repo_name, opt.filter))
+                return
+        else:
+            if not opt.filter.fullmatch(repo_name):
+                opt.info('Skipping {}; did not match with filter: {}'
+                        .format(repo_name, opt.filter))
+                return
+
+        do_scrub(repo, opt)
+
     opt.warn('Double-check all repos have actually been removed.')
     opt.warn('Sometimes you need to re-run this a couple of times.')
 

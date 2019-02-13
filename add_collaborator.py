@@ -33,10 +33,14 @@ def add_collaborator_deco(parser):
     )
 
 
-def add_collaborator_repo(repo, user, permission, opt):
+def do_add_collaborator(repo, user, permission, opt):
 
-    opt.info('Proceeding to add {} as collaborator to {} with {} permissions'
+    opt.info('Adding {} as collaborator to {} with {} permissions'
             .format(user, repo.full_name, permission))
+
+    if opt.noop:
+        opt.log('--noop option specified; not adding collaborator')
+        return
 
     repo.add_to_collaborators(user, permission=permission)
 
@@ -55,7 +59,7 @@ def add_collaborator(opt):
         opt.warn('Aborting')
         return
 
-    add_collaborator_repo(repo, opt.user, opt.permission, opt)
+    do_add_collaborator(repo, opt.user, opt.permission, opt)
 
 
 def main(args=None, config_path=None):

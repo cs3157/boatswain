@@ -36,12 +36,17 @@ def fmt_hyphen(prefix, name):
 
 
 def do_mk_repo(org, repo_name, opt):
-    opt.info('creating private repo {} under organization {}'.format(repo_name, org))
+    opt.info('Creating private repo {} under organization {}'
+            .format(repo_name, org))
     
+    if opt.noop:
+        opt.log('--noop option specified; not creating repo')
+        return
+
     repo = org.create_repo(repo_name, private=True)
 
     # funky output so easily greppable
-    opt.warn('@CREATED_REPO: {} {}'.format(repo_name, repo.git_url))
+    opt.log('@CREATED_REPO: {} {}'.format(repo_name, repo.git_url))
 
     return repo
 

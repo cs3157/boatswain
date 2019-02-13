@@ -169,18 +169,19 @@ def wrangle_canvas(opt):
 
     log_dump_wrangler(url, data, headers, opt)
 
-    if opt.noop:
-        opt.log('--noop option specified; not submitting to Canvas.')
-        return
-
     opt.log('About to submit. Make sure the assignment is muted.')
     cont = opt.promptYes('Would you like to continue?', True)
 
-    if cont:
-        opt.log('Submitting to Canvas...')
-        return submit_grades(url, data, headers, opt)
+    if not cont:
+        opt.log('Aborting; not submitting to Canvas')
+        return
 
-    opt.log('Aborting; not submiting to Canvas')
+    if opt.noop:
+        opt.log('--noop option specified; not submitting to Canvas')
+        return
+
+    opt.log('Submitting to Canvas...')
+    return submit_grades(url, data, headers, opt)
 
 
 def main(args=None, config_path=None, verbose=True):

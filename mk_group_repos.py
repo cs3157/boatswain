@@ -6,7 +6,7 @@ import argparse
 import csv
 from github import Github
 
-from add_collaborator import add_collaborator_repo
+from add_collaborator import do_add_collaborator
 from mk_repo import do_mk_repo, fmt_hyphen
 
 CMD_NAME = 'mk_group_repos'
@@ -73,6 +73,13 @@ def mk_group_repos(opt):
         repo_name = fmt_hyphen(opt.prefix, group)
 
         if opt.lookup:
+            action = 'looking up'
+        else:
+            action = 'creating'
+        opt.info('{} {}/{} and adding members {}'
+                .format(action, opt.org, repo_name, members))
+
+        if opt.lookup:
             opt.info('Looking up repo {}/{}'.format(org.name, repo_name))
             repo = org.get_repo(repo_name)
         else:
@@ -80,7 +87,7 @@ def mk_group_repos(opt):
 
         opt.info('Adding {} to {}'.format(members, repo.full_name))
         for member in members:
-            add_collaborator_repo(repo, member, opt.permission, opt)
+            do_add_collaborator(repo, member, opt.permission, opt)
 
 
 def main(args=None, config_path=None):
