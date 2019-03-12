@@ -3,7 +3,7 @@
 import sys
 import boatswain_env as benv
 from github import Github
-from add_collaborator import add_collaborator_repo
+from add_collaborator import do_add_collaborator
 
 CMD_NAME = 'add_collaborators'
 DESC = 'Add multiple users as collaborator to GitHub repo'

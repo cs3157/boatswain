@@ -56,7 +56,7 @@ def retrieve_index(header_row, target):
     for i, cell in enumerate(header_row):
         if cell == target:
             return i
-    raise LookupError('uni index not found')
+    raise LookupError('{} index not found'.format(target))
 
 
 def retrieve_indices(header, opt):

@@ -80,12 +80,16 @@ def mk_group_repos(opt):
                 .format(action, opt.org, repo_name, members))
 
         if opt.lookup:
-            opt.info('Looking up repo {}/{}'.format(org.name, repo_name))
             repo = org.get_repo(repo_name)
+            opt.info('Looked up repo {}/{}'.format(org.name, repo_name))
         else:
             repo = do_mk_repo(org, repo_name, opt)
 
-        opt.info('Adding {} to {}'.format(members, repo.full_name))
+        opt.info('Adding {} to {}'.format(members, repo_name))
+        if repo is None and opt.noop:
+            opt.info('--noop specified; skipping passed do_add_collaborators')
+            continue
+
         for member in members:
             do_add_collaborator(repo, member, opt.permission, opt)
 
