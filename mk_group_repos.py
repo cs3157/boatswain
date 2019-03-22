@@ -37,18 +37,11 @@ def mk_group_repos_deco(parser):
                         metavar='push|pull|admin',
     )
 
-    parser.add_argument('-l', '--lookup',
+    parser.add_argument('-c', '--create',
                         default=False,
                         action='store_true',
-                        help='look up existing repo rather than create one',
+                        help='create repo first',
     )
-
-    # hopefully we won't need this
-    # parser.add_argument('-b', '--begin',
-    #                     default=None,
-    #                     help='only begin adding upon encountering this user',
-    #                     metavar='<begin>',
-    # )
 
 
 def mk_group_repos(opt):
@@ -61,7 +54,7 @@ def mk_group_repos(opt):
                                 fmt_hyphen(opt.prefix, '<group>')),
                         True):
         opt.warn('Aborting')
-        return 
+        return
 
     opt.info('Creating repos under {} for groups in {}, with name {}'
             .format(opt.groups.name, opt.org,
@@ -72,18 +65,18 @@ def mk_group_repos(opt):
 
         repo_name = fmt_hyphen(opt.prefix, group)
 
-        if opt.lookup:
-            action = 'looking up'
-        else:
+        if opt.create:
             action = 'creating'
+        else:
+            action = 'looking up'
         opt.info('{} {}/{} and adding members {}'
                 .format(action, opt.org, repo_name, members))
 
-        if opt.lookup:
+        if opt.create:
+            repo = do_mk_repo(org, repo_name, opt)
+        else:
             repo = org.get_repo(repo_name)
             opt.info('Looked up repo {}/{}'.format(org.name, repo_name))
-        else:
-            repo = do_mk_repo(org, repo_name, opt)
 
         opt.info('Adding {} to {}'.format(members, repo_name))
         if repo is None and opt.noop:
