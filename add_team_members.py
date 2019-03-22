@@ -48,9 +48,11 @@ def add_team_members_deco(parser):
 
 def do_create_team(org, team_name, opt):
     opt.info('Creating secret team {} in org {}'.format(team_name, org.name))
-    
+
     if opt.noop:
         opt.log('--noop option specified; not creating team')
+        # TODO: return a magic mock so --noop can safely proceed
+        return None
 
     team = org.create_team(team_name, privacy='secret')
 
@@ -61,7 +63,7 @@ def do_create_team(org, team_name, opt):
 
 def do_add_team_member(team, user, role, opt):
     opt.info('Adding {} as team member to {} with {} permissions'
-            .format(user.name, team.name, role))
+            .format(user.login, team.name, role))
 
     if opt.noop:
         opt.log('--noop option specified; not adding team member')
@@ -69,7 +71,7 @@ def do_add_team_member(team, user, role, opt):
 
     team.add_membership(user, role=role)
 
-    opt.info('User {} successfully added'.format(user.name))
+    opt.info('User {} successfully added'.format(user.login))
 
 
 def add_team_members(opt):
@@ -83,7 +85,7 @@ def add_team_members(opt):
         if not opt.promptYes('Are you sure you would like to proceed?', True):
             opt.warn('Aborting')
             return
-        
+
         team = do_create_team(org, opt.team, opt)
     else:
         for t in org.get_teams():
@@ -93,11 +95,11 @@ def add_team_members(opt):
 
     if team is None:
         opt.error('Team {} not found in org {}'.format(opt.team, opt.org))
-        opt.error('You may try passing the --create flag to create the team')
+        opt.error('You may try passing the --create flag to create it')
         return
 
     opt.info('Adding users from {} as team members to {}/{} with {} permissions'
-            .format('opt.users.name, org.name, team.name, opt.role'))
+            .format(opt.users.name, org.name, team.name, opt.role))
 
     if not opt.promptYes('Are you sure you would like to proceed?', True):
         opt.warn('Aborting')
@@ -115,7 +117,7 @@ def add_team_members(opt):
                 do_add = True
 
             if do_add:
-                do_add_member(team, g.get_user(user), opt.role, opt)
+                do_add_team_member(team, g.get_user(user), opt.role, opt)
                 added = added + 1
             else:
                 opt.info('Skipped {}'.format(user))
