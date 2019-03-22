@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import sys
+from unittest.mock import MagicMock
 import boatswain_env as benv
 import argparse
 from github import Github
@@ -51,8 +52,9 @@ def do_create_team(org, team_name, opt):
 
     if opt.noop:
         opt.log('--noop option specified; not creating team')
-        # TODO: return a magic mock so --noop can safely proceed
-        return None
+        mock_team = MagicMock()
+        mock_team.name = team_name
+        return mock_team
 
     team = org.create_team(team_name, privacy='secret')
 
