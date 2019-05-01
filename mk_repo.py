@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import sys
+from unittest.mock import MagicMock
 import boatswain_env as benv
 from github import Github
 from add_collaborator import do_add_collaborator
@@ -41,7 +42,9 @@ def do_mk_repo(org, repo_name, opt):
     
     if opt.noop:
         opt.log('--noop option specified; not creating repo')
-        return
+        mock_repo = MagicMock()
+        mock_repo.full_name, mock_repo.name  = repo_name, repo_name
+        return mock_repo
 
     repo = org.create_repo(repo_name, private=True)
 

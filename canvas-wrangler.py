@@ -85,18 +85,25 @@ def retrieve_indices(header, opt):
     return student_idx, grade_idx, comment_idx
 
 
-def build_grade_data(grades, student_idx, grade_idx=None, comment_idx=None):
+def build_grade_data(grades, student_i, grade_i, comment_i, opt):
     grade_data = {}
     for i, row in enumerate(grades):
         grade_entry = {}
-        user_id = row[student_idx]
+        user_id = row[student_i]
 
-        if grade_idx is not None:
-            grade_entry['posted_grade'] = row[grade_idx]
+        if grade_i is not None:
+            grade = row[grade_i]
+            grade_entry['posted_grade'] = grade
+        else:
+            grade = None
 
-        if comment_idx is not None:
-            grade_entry['text_comment'] = row[comment_idx]
+        if comment_i is not None:
+            comment = row[comment_i]
+            grade_entry['text_comment'] = comment
+        else:
+            comment = None
 
+        opt.info('{} ({}): {}'.format(user_id, grade, comment))
         grade_data['sis_user_id:{}'.format(user_id)] = grade_entry
 
     return grade_data
@@ -130,16 +137,16 @@ def wrangle_canvas(opt):
     grades = csv.reader(opt.grades)
     header = next(grades)
 
-    student_idx, grade_idx, comment_idx = retrieve_indices(header, opt)
+    student_i, grade_i, comment_i = retrieve_indices(header, opt)
 
-    grade_data = build_grade_data(grades, student_idx, grade_idx, comment_idx)
+    grade_data = build_grade_data(grades, student_i, grade_i, comment_i, opt)
 
     canvasURL = 'https://courseworks2.columbia.edu/' # TODO: don't hard
 
     canvas = Canvas(canvasURL, opt.canvasToken())
     course = canvas.get_course(opt.course_id)
     assignment = course.get_assignment(opt.assignment_id)
- 
+
     progress = submit_grades(grade_data, assignment, opt)
 
     # do something with progress? it has the following useful fields:
@@ -158,6 +165,6 @@ def main(args=None, config_path=None, verbose=True):
             desc=DESC, parse_deco=wrangler_deco, req_canvas=True)
 
     wrangle_canvas(opt)
-    
+
 if __name__ == '__main__':
     main()
