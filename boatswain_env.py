@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 import configparser
 import os
@@ -10,6 +10,7 @@ DEFAULT_INI_PATH = os.path.expanduser('~/.boatswain.ini')
 
 CANVAS_SECTION = 'canvas'
 CANVAS_TOKEN = 'token'
+CANVAS_URL = 'url'
 
 GITHUB_SECTION = 'github'
 GITHUB_TOKEN = 'token'
@@ -248,6 +249,9 @@ def newPopulatedConfigInteractive():
                 'and clicking on "+New Access Token"')
         canvasToken = itv.promptInput('Enter Canvas auth token')
         config.set(CANVAS_SECTION, CANVAS_TOKEN, canvasToken)
+        print("read token: {}".format(canvasToken))
+        canvasUrl = itv.promptInput('Enter Canvas URL')
+        config.set(CANVAS_SECTION, CANVAS_URL, canvasUrl)
 
     i = itv.promptSelect('Configure GitHub token?', ['n'], default='y')
     if i == 'y':
