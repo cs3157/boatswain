@@ -170,9 +170,6 @@ def ParseOption(
                         help='debug mode; enable all output',
     )
 
-    
-
-
     config = BoatswainConfig(config_path)
 
     if req_canvas:
