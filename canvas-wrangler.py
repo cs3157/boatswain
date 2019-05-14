@@ -141,9 +141,7 @@ def wrangle_canvas(opt):
 
     grade_data = build_grade_data(grades, student_i, grade_i, comment_i, opt)
 
-    canvasURL = 'https://courseworks2.columbia.edu/' # TODO: don't hard
-
-    canvas = Canvas(canvasURL, opt.canvasToken())
+    canvas = Canvas(opt.canvasUrl(), opt.canvasToken())
     course = canvas.get_course(opt.course_id)
     assignment = course.get_assignment(opt.assignment_id)
 

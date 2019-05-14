@@ -86,6 +86,23 @@ Boatswain will be expanded to support arbitrary arguments in this config file
 which could save you some typing when running commands, but for now just accept
 that it's a little overkill.
 
+If you don't need either one of Canvas or GitHub integration, you can just
+answer "no" when it asks if you'd like to configure one or the other. If you
+answer "yes", make sure you have the respective auth tokens ready.
+
+When configuring Canvas, it will also ask for a URL. You should pass in the URL
+that corresponds to the host name where Canvas is hosted. For example, for
+Columbia, you should enter:
+
+    https://courseworks2.columbia.edu/
+
+If you are using a version of Canvas Wrangler from before May 14, 2019, you may
+also add the url configuration to your `boatswain.ini` manually, e.g.:
+
+    [canvas]
+    token   = <token>
+    url     = https://courseworks2.columbia.edu/
+
 
 Canvas Wrangler
 ===============
