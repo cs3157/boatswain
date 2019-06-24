@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 import configparser
 import os
@@ -10,6 +10,7 @@ DEFAULT_INI_PATH = os.path.expanduser('~/.boatswain.ini')
 
 CANVAS_SECTION = 'canvas'
 CANVAS_TOKEN = 'token'
+CANVAS_URL = 'url'
 
 GITHUB_SECTION = 'github'
 GITHUB_TOKEN = 'token'
@@ -33,6 +34,9 @@ class BoatswainConfig(configparser.ConfigParser):
     def canvasToken(self):
         return self.get(CANVAS_SECTION, CANVAS_TOKEN)
 
+    def canvasUrl(self):
+        return self.get(CANVAS_SECTION, CANVAS_URL)
+
     def githubToken(self):
         return self.get(GITHUB_SECTION, GITHUB_TOKEN)
 
@@ -49,6 +53,11 @@ class BoatswainOption(argparse.Namespace):
         if self.canvas_token is None:
             return self.config.canvasToken()
         return self.canvas_token
+
+    def canvasUrl(self):
+        if self.canvas_url is None:
+            return self.config.canvasUrl()
+        return self.canvas_url
 
     def githubToken(self):
         if self.github_token is None:
@@ -161,9 +170,6 @@ def ParseOption(
                         help='debug mode; enable all output',
     )
 
-    
-
-
     config = BoatswainConfig(config_path)
 
     if req_canvas:
@@ -175,12 +181,33 @@ def ParseOption(
                                 help='override Boatswain Canvas token',
                                 metavar='<canvas-token>',
             )
-        # handle incomplete config; don't handle NoSectionError because we
-        # assume that the canvas and github sections at least exist
         except configparser.NoOptionError:
+            print('[WARN]: You appear to be missing a Canvas token in your '
+                + 'Boatswain configuration ({}). Please add this information '
+                + 'to your config file under section [canvas] with key "token".'
+                + '\n'.format(config_path))
             parser.add_argument('canvas_token',
                                 type=str,
                                 help='Canvas LMS auth token',
+                                metavar='<canvas-token>',
+            )
+
+        try:
+            canvasUrl = config.canvasUrl()
+            parser.add_argument('--canvas-url',
+                                default=canvasUrl,
+                                type=str,
+                                help='override Boatswain Canvas URL',
+                                metavar='<canvas-url>',
+            )
+        except configparser.NoOptionError:
+            print('[WARN]: You appear to be missing the Canvas URL in your '
+                + 'Boatswain configuration ({}). Please add this information '
+                + 'to your config file under section [canvas] with key "url".'
+                + '\n'.format(config_path))
+            parser.add_argument('canvas_url',
+                                type=str,
+                                help='Canvas LMS URL',
                                 metavar='<canvas-token>',
             )
 
@@ -193,9 +220,11 @@ def ParseOption(
                                 help='override Boatswain GitHub token',
                                 metavar='<github-token>',
             )
-        # handle incomplete config; don't handle NoSectionError because we
-        # assume that the canvas and github sections at least exist
         except configparser.NoOptionError:
+            print('[WARN]: You appear to be missing a GitHub token in your '
+                + 'Boatswain configuration ({}). Please add this information '
+                + 'to your config file under section [github] with key "token".'
+                + '\n'.format(config_path))
             parser.add_argument('github_token',
                                 type=str,
                                 help='GitHub auth token',
@@ -241,15 +270,19 @@ def newPopulatedConfigInteractive():
     config.add_section(CANVAS_SECTION)
     config.add_section(GITHUB_SECTION)
 
-    i = itv.promptSelect('Configure Canvas token?', ['n'], default='y')
+    i = itv.promptSelect('Configure Canvas?', ['n'], default='y')
     if i == 'y':
         itv.output('You can generate a new Canvas token by going to your '
                 'Canvas Profile -> Settings -> Approved Integrations '
                 'and clicking on "+New Access Token"')
+
+        canvasUrl = itv.promptInput('Enter Canvas URL')
+        config.set(CANVAS_SECTION, CANVAS_URL, canvasUrl)
+
         canvasToken = itv.promptInput('Enter Canvas auth token')
         config.set(CANVAS_SECTION, CANVAS_TOKEN, canvasToken)
 
-    i = itv.promptSelect('Configure GitHub token?', ['n'], default='y')
+    i = itv.promptSelect('Configure GitHub?', ['n'], default='y')
     if i == 'y':
         githubToken = itv.promptInput('Enter GitHub auth token')
         config.set(GITHUB_SECTION, GITHUB_TOKEN, githubToken)

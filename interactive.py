@@ -17,7 +17,6 @@ def promptInput(prompt, fmt='', default=''):
 
     while True:
         inp = input(promptf)
-        inp = inp.lower()
         if inp != '':
             return inp
         elif default != '' and inp == '':
@@ -33,6 +32,18 @@ def promptValidate(prompt, validator, fmt='', default=''):
         if v == '':
             return inp
         output('Invalid input (case-insensitive): {}'.format(v))
+
+
+def selectorValidator(options, default=''):
+    def validator(inp):
+        i = inp.lower()
+        if default != '':
+            if i == default.lower() or i == '':
+                return ''
+        if i in options:
+            return ''
+        return i
+    return validator
 
 
 '''
@@ -52,18 +63,7 @@ def promptSelect(prompt, alts, default=''):
     validator = selectorValidator(options, default=default)
     inp = promptValidate(prompt, validator, fmt=fmt, default=default)
 
-    return inp
-
-
-def selectorValidator(options, default=''):
-    def validator(inp):
-        if default != '':
-            if inp == default.lower() or inp == '':
-                return ''
-        if inp in options:
-            return ''
-        return inp
-    return validator
+    return inp.lower()
 
 
 def newFileValidator():
