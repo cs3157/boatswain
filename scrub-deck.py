@@ -32,10 +32,10 @@ def scrub_deco(parser):
 
 def do_scrub(repo, opt):
     if opt.noop:
-        opt.log('--noop option specified; not deleting repo')
+        opt.log('--noop option specified; not deleting {}'.format(repo.name))
         return
 
-    opt.info('Deleting {}...'.format(repo))
+    opt.warn('Deleting {}...'.format(repo.name))
     repo.delete()
 
 
