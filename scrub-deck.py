@@ -54,19 +54,18 @@ def scrub_org(opt):
             ' removed, right?', True):
         opt.info('Backing out of scrub because confused user needs a moment')
         return
-
     for repo in org.get_repos():
         repo_name = repo.full_name.split('/')[-1]
         if opt.invert:
             if opt.filter.fullmatch(repo_name):
                 opt.info('Skipping {}; matched with inverted filter: {}'
                         .format(repo_name, opt.filter))
-                return
+                continue
         else:
             if not opt.filter.fullmatch(repo_name):
                 opt.info('Skipping {}; did not match with filter: {}'
                         .format(repo_name, opt.filter))
-                return
+                continue
 
         do_scrub(repo, opt)
 
