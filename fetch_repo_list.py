@@ -28,7 +28,7 @@ def fetch_repo_list(opt):
 
     with open(opt.manifest, 'w') as manifest:
         for repo in org.get_repos(type='all'):
-            manifest.write(f"{repo.name}\n")
+            manifest.write(f"{opt.org}/{repo.name}\n")
 
 def main(args=None, config_path=None):
     if args is None:
