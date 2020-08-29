@@ -16,19 +16,12 @@ def fetch_repo_list_deco(parser):
                         metavar='<org>',
     )
 
-    parser.add_argument('manifest',
-                        type=str,
-                        help='file name to dump list',
-                        metavar='<manifest>'
-    )
-
 def fetch_repo_list(opt):
     g = Github(opt.githubToken())
     org = g.get_organization(opt.org)
 
-    with open(opt.manifest, 'w') as manifest:
-        for repo in org.get_repos(type='all'):
-            manifest.write(f"{opt.org}/{repo.name}\n")
+    for repo in org.get_repos(type='all'):
+        print(f"{opt.org}/{repo.name}")
 
 def main(args=None, config_path=None):
     if args is None:
