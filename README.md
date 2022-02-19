@@ -34,7 +34,7 @@ that your `python` verion is 3, not 2.
 
 Now, you can install dependencies into this virtual environment.
 
-    (venv) $ pip install -r requirements.txt
+    (venv) $ pip3 install -r requirements.txt
 
 This installs all the dependencies from the `requirements.txt` file. Note that
 you should not need to do any of this as `sudo`.
