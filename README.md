@@ -20,7 +20,7 @@ Let's install all the dependencies the right way.
 Make sure you have Python3 and [`virtualenv`][venv] installed. Clone this repo.
 In the repo directory, create a virtual environment with the following command:
 
-    $ virtualenv venv
+    $ python3 -m venv venv
 
 `venv` could have been any path name, but we're going to assume that you used
 `venv`, and proceed. You should see a directory named `venv` created, and now
