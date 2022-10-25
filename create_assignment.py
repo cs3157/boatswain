@@ -38,8 +38,10 @@ def main(args=None, config_path=None, verbose=True):
         'points_possible': opt.points,
         'grading_type': 'points',
         'description': '',
-        'published': False # equivalent to setting posting policy to manual
+        'published': True
     })
+
+    new_assignment = new_assignment.edit(assignment={'post_manually': True})
 
     print(new_assignment.id)
 
