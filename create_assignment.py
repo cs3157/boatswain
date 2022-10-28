@@ -1,5 +1,7 @@
 import sys
+
 from canvasapi import Canvas
+
 import boatswain_env as benv
 
 
@@ -21,16 +23,11 @@ def wrangler_deco(parser):
     )
 
 
-
-def main(args=None, config_path=None, verbose=True):
-    if args is None:
-        args = sys.argv[1:]
-
-    opt = benv.ParseOption(args, parse_deco=wrangler_deco, config_path=config_path)
-
+def create_assignment(opt):
     canvas = Canvas(opt.config.canvasUrl(), opt.config.canvasToken())
     course = canvas.get_course(opt.course_id)
 
+    # note: create_assignment() cannot set post_manually, bc canvas is silly
     new_assignment = course.create_assignment({
         'name': opt.assignment_name,
         'submission_types': [],
@@ -41,9 +38,18 @@ def main(args=None, config_path=None, verbose=True):
         'published': True
     })
 
-    new_assignment = new_assignment.edit(assignment={'post_manually': True})
+    return new_assignment
 
+
+def main(args=None, config_path=None):
+    if args is None:
+        args = sys.argv[1:]
+
+    opt = benv.ParseOption(args, parse_deco=wrangler_deco, config_path=config_path)
+
+    new_assignment = create_assignment(opt)
     print(new_assignment.id)
+
 
 if __name__ == '__main__':
     main()
