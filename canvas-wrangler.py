@@ -55,7 +55,7 @@ def retrieve_index(header_row, target):
     for i, cell in enumerate(header_row):
         if cell == target:
             return i
-    raise LookupError('{} index not found'.format(target))
+    raise LookupError(f'{target} index not found')
 
 
 def retrieve_indices(header, opt):
@@ -103,18 +103,18 @@ def build_grade_data(grades, student_i, grade_i, comment_i, opt):
         else:
             comment = None
 
-        opt.info('{} ({}): {}'.format(user_id, grade, comment))
-        grade_data['sis_user_id:{}'.format(user_id)] = grade_entry
+        opt.info(f'{user_id} ({grade}): {comment}')
+        grade_data[f'sis_user_id:{user_id}'] = grade_entry
 
     return grade_data
 
 
 def log_dump_wrangler(grade_data, course, assignment, opt):
-    opt.info('Course: {}'.format(course))
-    opt.info('Assignment: {}'.format(assignment))
+    opt.info(f'Course: {course}')
+    opt.info(f'Assignment: {assignment}')
     opt.info('Grade Data: {')
     for k in grade_data:
-        opt.info('{} : {}'.format(k, grade_data[k]))
+        opt.info(f'{k} : {grade_data[k]}')
     opt.info('}')
     opt.info('')
 
