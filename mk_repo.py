@@ -31,14 +31,13 @@ def mk_repo_deco(parser):
 
 def fmt_hyphen(prefix, name):
     if prefix[-1] == '-':
-        return '{}{}'.format(prefix, name)
+        return f'{prefix}{name}'
     else:
-        return '{}-{}'.format(prefix, name)
+        return f'{prefix}-{name}'
 
 
 def do_mk_repo(org, repo_name, opt):
-    opt.info('Creating private repo {} under organization {}'
-            .format(repo_name, org))
+    opt.info(f'Creating private repo {repo_name} under organization {org}')
     
     if opt.noop:
         opt.log('--noop option specified; not creating repo')
@@ -49,7 +48,7 @@ def do_mk_repo(org, repo_name, opt):
     repo = org.create_repo(repo_name, private=True)
 
     # funky output so easily greppable
-    opt.log('@CREATED_REPO: {} {}'.format(repo_name, repo.git_url))
+    opt.log(f'@CREATED_REPO: {repo_name} {repo.git_url}')
 
     return repo
 
@@ -61,14 +60,12 @@ def mk_repo(opt):
     repo_name = fmt_hyphen(opt.prefix, opt.repo)
 
     if not opt.promptYes(('Are you sure you would like to create a private '
-                            'repo under organization {} named {}?')
-                            .format(opt.org, repo_name),
+                            f'repo under organization {opt.org} named {repo_name}?'),
                             True):
         opt.warn('Aborting')
         return 
 
-    opt.info('Proceeding to create private repo {}/{}'
-            .format(opt.org, repo_name))
+    opt.info(f'Proceeding to create private repo {opt.org}/{repo_name}')
 
     do_mk_repo(org, repo_name, opt)
 
