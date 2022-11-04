@@ -7,13 +7,13 @@ def output(*args):
 
 def promptInput(prompt, fmt='', default=''):
     if fmt != '':
-        promptf = '{} [{}]'.format(prompt, fmt)
+        promptf = f'{prompt} [{fmt}]'
     elif default != '':
-        promptf = '{} [{}]'.format(prompt, default)
+        promptf = f'{prompt} [{default}]'
     else:
         promptf = prompt
 
-    promptf = '{}: '.format(promptf)
+    promptf = '{promptf}: '
 
     while True:
         inp = input(promptf)
@@ -31,7 +31,7 @@ def promptValidate(prompt, validator, fmt='', default=''):
         v = validator(inp)
         if v == '':
             return inp
-        output('Invalid input (case-insensitive): {}'.format(v))
+        output(f'Invalid input (case-insensitive): {v}')
 
 
 def selectorValidator(options, default=''):
@@ -70,7 +70,7 @@ def newFileValidator():
     def validator(inp):
         try:
             if os.path.exists(inp):
-                return '{} already exists'.format(inp)
+                return f'{inp} already exists'
             else:
                 open(inp, 'w').close()
                 os.unlink(inp)
