@@ -32,10 +32,10 @@ def scrub_deco(parser):
 
 def do_scrub(repo, opt):
     if opt.noop:
-        opt.log('--noop option specified; not deleting {}'.format(repo.name))
+        opt.log(f'--noop option specified; not deleting {repo.name}')
         return
 
-    opt.warn('Deleting {}...'.format(repo.name))
+    opt.warn(f'Deleting {repo.name}...')
     repo.delete()
 
 
@@ -43,7 +43,7 @@ def scrub_org(opt):
     g = Github(opt.githubToken())
     org = g.get_organization(opt.org_name)
 
-    opt.warn('Scrubbing Github Org: {} ({})'.format(org.login, org.url))
+    opt.warn(f'Scrubbing Github Org: {org.login} ({org.url})')
 
     if not opt.promptYes('Are you sure you want to scrub this org?', False):
         # deliberately disallow --yes to work
@@ -58,13 +58,11 @@ def scrub_org(opt):
         repo_name = repo.full_name.split('/')[-1]
         if opt.invert:
             if opt.filter.fullmatch(repo_name):
-                opt.info('Skipping {}; matched with inverted filter: {}'
-                        .format(repo_name, opt.filter))
+                opt.info(f'Skipping {repo_name}; matched with inverted filter: {opt.filter}')
                 continue
         else:
             if not opt.filter.fullmatch(repo_name):
-                opt.info('Skipping {}; did not match with filter: {}'
-                        .format(repo_name, opt.filter))
+                opt.info(f'Skipping {repo_name}; did not match with filter: {opt.filter}')
                 continue
 
         do_scrub(repo, opt)
