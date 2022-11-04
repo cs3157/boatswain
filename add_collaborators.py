@@ -43,18 +43,15 @@ def add_collaborators_deco(parser):
 
 def add_collaborators(opt):
     g = Github(opt.githubToken())
-    repo_full_name = '{}/{}'.format(opt.owner, opt.repo)
+    repo_full_name = f'{opt.owner}/{opt.repo}'
     repo = g.get_repo(repo_full_name)
 
-    if not opt.promptYes(('Are you sure you would like to add users from {} '
-                            'as collaborators to {} with {} permissions?')
-                            .format(opt.users.name, repo_full_name,
-                                opt.permission), True):
+    if not opt.promptYes((f'Are you sure you would like to add users from {opt.users.name} '
+                            f'as collaborators to {repo_full_name} with {opt.permission} permissions?'), True):
         opt.warn('Aborting')
         return 
 
-    opt.info('Proceeding to add {} as collaborators to {} with {} permissions'
-            .format(opt.users.name, repo_full_name, opt.permission))
+    opt.info(f'Proceeding to add {opt.users.name} as collaborators to {repo_full_name} with {opt.permission} permissions'
 
     do_add = opt.begin is None
     begin, added, total = 0, 0, 0
@@ -71,15 +68,14 @@ def add_collaborators(opt):
                 do_add_collaborator(repo, user, opt.permission, opt)
                 added = added + 1
             else:
-                opt.info('Skipped {}'.format(user))
+                opt.info(f'Skipped {user}')
 
         except Exception as e:
             opt.error(e)
-            opt.error('{} failed on {} ({})'.format(CMD_NAME, user, total))
+            opt.error(f'{CMD_NAME} failed on {user} ({total})')
             return
 
-    opt.info('Added {} users of {} total users, starting from index {}'
-            .format(added, total, begin))
+    opt.info(f'Added {added} users of {total} total users, starting from index {begin}')
 
 
 def main(args=None, config_path=None):

@@ -49,16 +49,12 @@ def mk_group_repos(opt):
     org = g.get_organization(opt.org)
 
     if not opt.promptYes(('Are you sure you would like to create group repos '
-                            'for users in {} under org {} with name {}')
-                            .format(opt.groups.name, opt.org,
-                                fmt_hyphen(opt.prefix, '<group>')),
+                            f'for users in {opt.groups.name} under org {opt.org} with name {fmt_hyphen(opt.prefix, '<group>')}'),
                         True):
         opt.warn('Aborting')
         return
 
-    opt.info('Creating repos under {} for groups in {}, with name {}'
-            .format(opt.groups.name, opt.org,
-                fmt_hyphen(opt.prefix, '<group>')))
+    opt.info(f'Creating repos under {opt.groups.name} for groups in {opt.org}, with name {fmt_hyphen(opt.prefix, '<group>')}')
 
     for g in csv.reader(opt.groups):
         group, members = g[0], [m.strip() for m in g[1:] if m != '']
@@ -69,19 +65,18 @@ def mk_group_repos(opt):
             action = 'creating'
         else:
             action = 'looking up'
-        opt.info('{} {}/{} and adding members {}'
-                .format(action, opt.org, repo_name, members))
+        opt.info(f'{action} {opt.org}/{repo_name} and adding members {members}')
 
         if opt.create:
             repo = do_mk_repo(org, repo_name, opt)
         else:
             repo = org.get_repo(repo_name)
-            opt.info('Looked up repo {}/{}'.format(org.name, repo_name))
+            opt.info(f'Looked up repo {org.name}/{repo_name}')
 
         if opt.permission == 'none':
-            opt.info('Not adding {} to {}'.format(members, repo_name))
+            opt.info(f'Not adding {members} to {repo_name}')
         else:
-            opt.info('Adding {} to {}'.format(members, repo_name))
+            opt.info(f'Adding {members} to {repo_name}')
             for member in members:
                 do_add_collaborator(repo, member, opt.permission, opt)
 

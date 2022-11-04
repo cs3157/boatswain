@@ -71,7 +71,7 @@ class BoatswainOption(argparse.Namespace):
         if len(args) > 0:
             fmt = fmt.format(*args)
         if tag is not None:
-            fmt = '=={}==\t{}'.format(tag, fmt)
+            fmt = f'=={tag}==\t{fmt}'
 
         # TODO: logging to file
         print(fmt)
@@ -183,9 +183,9 @@ def ParseOption(
             )
         except configparser.NoOptionError:
             print('[WARN]: You appear to be missing a Canvas token in your '
-                + 'Boatswain configuration ({}). Please add this information '
+                + f'Boatswain configuration ({config_path}). Please add this information '
                 + 'to your config file under section [canvas] with key "token".'
-                + '\n'.format(config_path))
+                + '\n')
             parser.add_argument('canvas_token',
                                 type=str,
                                 help='Canvas LMS auth token',
@@ -202,9 +202,9 @@ def ParseOption(
             )
         except configparser.NoOptionError:
             print('[WARN]: You appear to be missing the Canvas URL in your '
-                + 'Boatswain configuration ({}). Please add this information '
+                + f'Boatswain configuration ({config_path}). Please add this information '
                 + 'to your config file under section [canvas] with key "url".'
-                + '\n'.format(config_path))
+                + '\n')
             parser.add_argument('canvas_url',
                                 type=str,
                                 help='Canvas LMS URL',
@@ -222,9 +222,9 @@ def ParseOption(
             )
         except configparser.NoOptionError:
             print('[WARN]: You appear to be missing a GitHub token in your '
-                + 'Boatswain configuration ({}). Please add this information '
+                + f'Boatswain configuration ({config_path}). Please add this information '
                 + 'to your config file under section [github] with key "token".'
-                + '\n'.format(config_path))
+                + '\n')
             parser.add_argument('github_token',
                                 type=str,
                                 help='GitHub auth token',
@@ -299,7 +299,7 @@ def createConfigInteractive():
         config = newPopulatedConfigInteractive()
         config.write(open(path, 'w+'))
 
-        itv.output('Boatswain config file created at {}'.format(path))
+        itv.output(f'Boatswain config file created at {path}')
 
     except EOFError:
         itv.output()

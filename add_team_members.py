@@ -48,7 +48,7 @@ def add_team_members_deco(parser):
 
 
 def do_create_team(org, team_name, opt):
-    opt.info('Creating secret team {} in org {}'.format(team_name, org.name))
+    opt.info(f'Creating secret team {team_name} in org {org.name}')
 
     if opt.noop:
         opt.log('--noop option specified; not creating team')
@@ -58,14 +58,13 @@ def do_create_team(org, team_name, opt):
 
     team = org.create_team(team_name, privacy='secret')
 
-    opt.info('Team {} successfully created'.format(team.name))
+    opt.info(f'Team {team.name} successfully created')
 
     return team
 
 
 def do_add_team_member(team, user, role, opt):
-    opt.info('Adding {} as team member to {} with {} permissions'
-            .format(user.login, team.name, role))
+    opt.info(f'Adding {user.login} as team member to {team.name} with {role} permissions')
 
     if opt.noop:
         opt.log('--noop option specified; not adding team member')
@@ -73,7 +72,7 @@ def do_add_team_member(team, user, role, opt):
 
     team.add_membership(user, role=role)
 
-    opt.info('User {} successfully added'.format(user.login))
+    opt.info(f'User {user.login} successfully added')
 
 
 def add_team_members(opt):
@@ -96,12 +95,11 @@ def add_team_members(opt):
                 break
 
     if team is None:
-        opt.error('Team {} not found in org {}'.format(opt.team, opt.org))
+        opt.error(f'Team {opt.team} not found in org {opt.org}')
         opt.error('You may try passing the --create flag to create it')
         return
 
-    opt.info('Adding users from {} as team members to {}/{} with {} permissions'
-            .format(opt.users.name, org.name, team.name, opt.role))
+    opt.info(f'Adding users from {opt.users.name} as team members to {org.name}/{team.name} with {opt.role} permissions')
 
     if not opt.promptYes('Are you sure you would like to proceed?', True):
         opt.warn('Aborting')
