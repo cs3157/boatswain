@@ -1,5 +1,5 @@
 #!/bin/bash
-ROOT_DIR="~/team_tmp"
+ROOT_DIR="/tmp/team_tmp"
 HANDLES_TXT="$ROOT_DIR/handles.txt"
 TEAMS_CSV="$ROOT_DIR/teams.csv"
 HANDLES_CSV="$ROOT_DIR/handles.csv"
@@ -16,6 +16,7 @@ mkdir -p "$ROOT_DIR"
 
 hw=$1
 team_name=$2
+boatswain_dir=`pwd`
 
 if [[ ! "$team_name" =~ ^[0-9]+ ]]; then
     echo "Team name must start with a number"
@@ -43,12 +44,28 @@ echo "test"
 ./add_team_members.py -v cs4118-hw "$ORG_TEAM" "$HANDLES_TXT" member
 read -p "Press enter to continue"
 
-git clone git@github.com:cs4118-hw/$hw.git "$ROOT_DIR/$hw"
-read -p "Press enter to continue"
-
 ./mk_group_repos.py --verbose --create \
         cs4118-hw "$hw" "$TEAMS_CSV" none
-read -p "Press enter to continue"
+read -p "Check GitHub to ensure the empty repo was created. Press enter to continue"
+
+git clone git@github.com:cs4118-hw/$hw.git "$ROOT_DIR/$hw"
+cd "$ROOT_DIR/$hw"
+echo "-----------------"
+git ls-files
+echo "-----------------"
+
+read -p "Skeleton code files should be present. Press enter to continue"
+
+echo "-----------------"
+git status
+echo "-----------------"
+
+read -p "There should be nothing to commit. Press enter to continue"
+
+echo "-----------------"
+git log
+echo "-----------------"
+read -p "There should only be the initial commit. Press enter to continue"
 
 git remote add "$team_name" git@github.com:cs4118-hw/"$hw"-"$team_name".git
 
@@ -57,8 +74,9 @@ git remote -v
 read -p "You should see two cs4118 remotes. Press enter to continue"
 
 git push "$team_name" master
-read -p "Press enter to continue"
+read -p "Check GitHub to ensure the skel code was pushed. Press enter to continue"
 
+cd "$boatswain_dir"
 ./mk_group_repos.py --verbose cs4118-hw "$hw" "$TEAMS_CSV" push
 
 rm -rf "$ROOT_DIR"
