@@ -1,23 +1,50 @@
-import pandas as pd
+#!/usr/bin/env python3
+
 import sys
+import pandas as pd
+import boatswain_env as benv
 
-# usage: [form.csv] [hw_number]
-# creates 2 files hw_number_handles.csv & hw_number_teams.csv
+DESC = 'Create teams and handles csv files from original group form'
+def clean_csv_deco(parser):
+    parser.add_argument('csv_file',
+                        type=str,
+                        help='path to csv file containing original group form',
+                        metavar='<csv_file>')
+    
+    parser.add_argument('hw',
+                        type=str,
+                        help='name of the hw in the following format hw<number>',
+                        metavar='<hw>')
 
-data = pd.read_csv(sys.argv[1])
-df = pd.DataFrame(data)
 
-df = pd.DataFrame(data)
-df["Group Name"] = df.index.astype(str) + "_" + df["Group Name"]
+def produce_new_csv(opt):
+    df = pd.read_csv(opt.csv_file)
 
-df1 = df[["Group Name", "UNI", "GitHub Handle"]]
-df2 = df[["Group Name", "UNI.1", "GitHub Handle.1"]].rename(columns={"UNI.1": "UNI", "GitHub Handle.1": "GitHub Handle"})
-df3 = df[["Group Name", "UNI.2", "GitHub Handle.2"]].rename(columns={"UNI.2": "UNI", "GitHub Handle.2": "GitHub Handle"})
+    df["Group Name"] = df.index.astype(str) + "-" + df["Group Name"]
 
-union_dfs = pd.concat([df1, df2, df3]).dropna()
+    df0 = df[["Group Name", "UNI", "GitHub Handle"]]
+    df1 = df[["Group Name", "UNI.1", "GitHub Handle.1"]].rename(
+        columns={"UNI.1": "UNI", "GitHub Handle.1": "GitHub Handle"})
+    df2 = df[["Group Name", "UNI.2", "GitHub Handle.2"]].rename(
+        columns={"UNI.2": "UNI", "GitHub Handle.2": "GitHub Handle"})
 
-union_dfs.to_csv(sys.argv[2] + "_handles.csv", index=False)
+    union_dfs = pd.concat([df0, df1, df2]).dropna()
 
-df_groups = df[["Group Name", "GitHub Handle", "GitHub Handle.1", "GitHub Handle.2"]]
+    union_dfs.to_csv(opt.hw + "_handles.csv", index=False)
 
-df_groups.to_csv(sys.argv[2] + "_teams.csv", index=False)
+    df_groups = df[
+        ["Group Name", "GitHub Handle", "GitHub Handle.1", "GitHub Handle.2"]]
+
+    df_groups.to_csv(opt.hw + "_teams.csv", index=False)
+
+def main(args=None):
+    if args is None:
+        args = sys.argv[1:]
+    
+    opt = benv.ParseOption(args, section=None, config_path=None, desc=DESC,
+            parse_deco=clean_csv_deco)
+
+    produce_new_csv(opt)
+
+if __name__ == '__main__':
+    main()
