@@ -11,10 +11,10 @@ CMD_NAME = 'drop_students'
 DESC = 'Remove dropped students from GitHub team repo'
 
 def drop_students_deco(parser):
-    parser.add_argument('owner',
+    parser.add_argument('org',
                     type=str,
-                    help='repo owner (individual or organization)',
-                    metavar='<repo-owner>',
+                    help='organization name',
+                    metavar='<org>',
     )
     parser.add_argument('roster',
                     type=str,
@@ -47,16 +47,13 @@ def find_and_drop_students(opt):
 
             for row in handles:
                 if row['UNI'] not in roster_l:
-                    remove_collaborator(row['GitHub Handle'], row['Group Name'],opt)
+                    remove_collaborator(row['GitHub Handle'], opt)
                     
 
-def remove_collaborator(handle, group_name, opt):
+def remove_collaborator(handle, opt):
     g = Github(opt.githubToken())
-    org = g.get_organization(opt.owner)
-    print(org)
-    #repo_full_name = '{}/{}'.format(opt.owner, group_name)
-    #repo = g.get_repo(repo_full_name)
-    #user = g.get_user(handle)
+    org = g.get_organization(opt.org)
+    user = g.get_user(handle)
 
     if not opt.promptYes(('Are you sure you would like to remove {} '
                             'as a member of {}?')
@@ -64,7 +61,7 @@ def remove_collaborator(handle, group_name, opt):
                         True):
         opt.warn('Aborting')
         return
-    user = g.get_user(handle)
+    
     do_remove_collaborator(org, user, opt)
 
 def do_remove_collaborator(org, user, opt):
