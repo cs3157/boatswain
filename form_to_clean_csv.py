@@ -20,7 +20,7 @@ def clean_csv_deco(parser):
 def produce_new_csv(opt):
     df = pd.read_csv(opt.csv_file)
 
-    df["Group Name"] = df.index.astype(str) + "-" + df["Group Name"]
+    df["Group Name"] = df["Team #"].astype(str) + "-" + df["Group Name"]
 
     df0 = df[["Group Name", "UNI", "GitHub Handle"]]
     df1 = df[["Group Name", "UNI.1", "GitHub Handle.1"]].rename(
