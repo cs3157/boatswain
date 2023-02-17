@@ -61,11 +61,16 @@ def remove_collaborator(handle, opt):
                         True):
         opt.warn('Aborting')
         return
-    
-    do_remove_collaborator(org, user, opt)
+    try:
+        do_remove_collaborator(org, user, opt)
+    except Exception as e:
+        opt.error(e)
+        opt.error('{} failed on {}'.format(CMD_NAME, user))
+        return
 
 def do_remove_collaborator(org, user, opt):
-    org.remove_from_members(user)
+        org.remove_from_members(user)
+    
 
 def main(args=None):
     if args is None:
