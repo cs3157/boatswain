@@ -37,6 +37,7 @@ def drop_students_deco(parser):
         print(f"{parser.prog}: error: too few arguments")
         exit()
 
+
 def find_and_drop_students(opt):
     with open(opt.roster) as r:
         roster = csv.DictReader(r)
@@ -55,21 +56,19 @@ def remove_collaborator(handle, opt):
     org = g.get_organization(opt.org)
     user = g.get_user(handle)
 
-    if not opt.promptYes(('Are you sure you would like to remove {} '
-                            'as a member of {}?')
-                            .format(handle, org),
-                        True):
+    if not opt.promptYes(f"Are you sure you would like to remove {handle} as a member of {org}?", True):
         opt.warn('Aborting')
         return
     try:
         do_remove_collaborator(org, user, opt)
     except Exception as e:
         opt.error(e)
-        opt.error('{} failed on {}'.format(CMD_NAME, user))
+        opt.error(f"{CMD_NAME} failed on {user}")
         return
 
+
 def do_remove_collaborator(org, user, opt):
-        org.remove_from_members(user)
+    org.remove_from_members(user)
     
 
 def main(args=None):
