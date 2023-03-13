@@ -1,7 +1,10 @@
 #!/usr/bin/env python3
 
 import sys
+
+import numpy as np
 import pandas as pd
+
 import boatswain_env as benv
 
 DESC = 'Create teams and handles csv files from original group form'
@@ -10,7 +13,7 @@ def clean_csv_deco(parser):
                         type=str,
                         help='path to csv file containing original group form',
                         metavar='<csv_file>')
-    
+
     parser.add_argument('hw',
                         type=str,
                         help='name of the hw in the following format hw<number>',
@@ -35,12 +38,14 @@ def produce_new_csv(opt):
     df_groups = df[
         ["Group Name", "GitHub Handle", "GitHub Handle.1", "GitHub Handle.2"]]
 
+    df_groups = df_groups.replace('', np.nan)
+    df_groups = df_groups.dropna(how='all')
     df_groups.to_csv(opt.hw + "_teams.csv", index=False)
 
 def main(args=None):
     if args is None:
         args = sys.argv[1:]
-    
+
     opt = benv.ParseOption(args, section=None, config_path=None, desc=DESC,
             parse_deco=clean_csv_deco)
 
