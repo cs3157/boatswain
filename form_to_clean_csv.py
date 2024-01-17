@@ -31,17 +31,18 @@ def produce_new_csv(opt):
     df2 = df[["Group Name", "UNI.2", "GitHub Handle.2"]].rename(
         columns={"UNI.2": "UNI", "GitHub Handle.2": "GitHub Handle"})
 
-    union_dfs = pd.concat([df0, df1, df2]).dropna()
-
     if not os.path.exists(ROSTER_DIR):
         os.makedirs(ROSTER_DIR)
 
+    union_dfs = pd.concat([df0, df1, df2]).dropna()
     union_dfs.to_csv(ROSTER_DIR + opt.hw + "-handles.csv", index=False)
 
     df_groups = df[
         ["Group Name", "GitHub Handle", "GitHub Handle.1", "GitHub Handle.2"]]
-
     df_groups.to_csv(ROSTER_DIR + opt.hw + "-teams.csv", index=False)
+
+    df_just_groups = df[['Group Name']]
+    df_just_groups.to_csv(ROSTER_DIR + opt.hw + "just-teams.csv", index=False)
 
 def main(args=None):
     if args is None:
