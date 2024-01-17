@@ -3,6 +3,9 @@
 import sys
 import pandas as pd
 import boatswain_env as benv
+import os
+
+ROSTER_DIR = 'rosters/'
 
 DESC = 'Create teams and handles csv files from original group form'
 def clean_csv_deco(parser):
@@ -30,12 +33,14 @@ def produce_new_csv(opt):
 
     union_dfs = pd.concat([df0, df1, df2]).dropna()
 
-    union_dfs.to_csv(opt.hw + "_handles.csv", index=False)
+
+
+    union_dfs.to_csv(ROSTER_DIR + opt.hw + "-handles.csv", index=False)
 
     df_groups = df[
         ["Group Name", "GitHub Handle", "GitHub Handle.1", "GitHub Handle.2"]]
 
-    df_groups.to_csv(opt.hw + "_teams.csv", index=False)
+    df_groups.to_csv(ROSTER_DIR + opt.hw + "-teams.csv", index=False)
 
 def main(args=None):
     if args is None:
