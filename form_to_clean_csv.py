@@ -33,7 +33,8 @@ def produce_new_csv(opt):
 
     union_dfs = pd.concat([df0, df1, df2]).dropna()
 
-
+    if not os.path.exists(ROSTER_DIR):
+        os.makedirs(ROSTER_DIR)
 
     union_dfs.to_csv(ROSTER_DIR + opt.hw + "-handles.csv", index=False)
 
