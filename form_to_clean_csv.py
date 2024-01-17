@@ -42,7 +42,7 @@ def produce_new_csv(opt):
     df_groups.to_csv(ROSTER_DIR + opt.hw + "-teams.csv", index=False)
 
     df_just_groups = df[['Group Name']]
-    df_just_groups.to_csv(ROSTER_DIR + opt.hw + "just-teams.csv", index=False)
+    df_just_groups.to_csv(ROSTER_DIR + opt.hw + "-just-teams.csv", index=False)
 
 def main(args=None):
     if args is None:
