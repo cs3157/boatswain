@@ -23,7 +23,7 @@ def add_collaborators_deco(parser):
     )
 
     parser.add_argument('users',
-                        type=argparse.FileType('rU'),
+                        type=argparse.FileType('r'),
                         help='path of list of users to be added',
                         metavar='<users.txt>',
     )
