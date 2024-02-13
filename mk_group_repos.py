@@ -26,7 +26,7 @@ def mk_group_repos_deco(parser):
     )
 
     parser.add_argument('groups',
-                        type=argparse.FileType('rU'),
+                        type=argparse.FileType('r'),
                         help='path of list of groups (group,[member,])',
                         metavar='<groups.csv>',
     )
