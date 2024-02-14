@@ -154,6 +154,11 @@ def wrangle_canvas(opt):
     #   .message        // tells you how many courses updated
     # we can have the option to block until complete
 
+    while(progress.workflow_state != "completed")
+        progress = progress.query()
+
+    #post grades
+    assignment.publish_provisional_grades()
 
 def main(args=None, config_path=None, verbose=True):
     if args is None:
