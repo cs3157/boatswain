@@ -63,10 +63,13 @@ You'll use this to set up your Boatswain config file.
 Authenticating with GitHub
 --------------------------
 
-Similarly, you can generate an authentication token from GitHub. For now, no
-published scripts actually use this, so you can only do this if you really want
-to. It's not at all difficult to just add in or change the token yourself later.
+Similarly, you can generate an authentication token from GitHub. You can generate
+one following the instructions from [GitHub's documentation][github_docs].
+TL;DR Create one [here][new_token].
+You can include this in your Boatswain config file as well.
 
+[github_docs]: https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens#creating-a-fine-grained-personal-access-token
+[new_token]: https://github.com/settings/personal-access-tokens/new
 
 Setting up your Boatswain configuration
 ---------------------------------------
